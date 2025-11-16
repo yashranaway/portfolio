@@ -14,9 +14,9 @@ import TimeCounter from "@/components/TimeCounter"
 import CodeHover from "@/components/CodeHover"
 import LinkPreview from "@/components/LinkPreview"
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect"
+import { RandomMatrix } from "@/components/ui/matrix"
 import githubAvatar from "@/assets/githubphotu.jpg"
 import linkedinAvatar from "@/assets/linkedinphotu.jpg"
-import logoImage from "@/assets/image.png"
 
 
 // Clean Skill Card Component with modern skill-icons
@@ -129,11 +129,24 @@ export default function Page() {
   const [showResume, setShowResume] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [hoveredProject, setHoveredProject] = useState(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   // Prevent hydration mismatch by only rendering theme-dependent content after mount
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Handle theme switch with smooth lazy animation
+  const handleThemeToggle = () => {
+    setIsTransitioning(true)
+    // Add a small delay for the lazy animation effect
+    setTimeout(() => {
+      setTheme(theme === "dark" ? "light" : "dark")
+      setTimeout(() => {
+        setIsTransitioning(false)
+      }, 300)
+    }, 100)
+  }
 
   // Global click handler for letter animations
   const triggerRandomLetterEffect = () => {
@@ -242,7 +255,9 @@ export default function Page() {
       easing="ease-out"
       extraScale={1.0}
     >
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-white relative">
+      <div className={`min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-white relative transition-colors duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+        isTransitioning ? 'transition-all' : ''
+      }`}>
         {/* Interactive Ripple Grid Background */}
         <BackgroundRippleEffect rows={20} cols={40} cellSize={50} />
       {/* Header */}
@@ -251,12 +266,37 @@ export default function Page() {
           variant="ghost"
           size="icon"
           data-no-letter
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="rounded-full w-10 h-10 sm:w-12 sm:h-12 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all duration-300"
+          onClick={handleThemeToggle}
+          disabled={isTransitioning}
+          className={`relative rounded-full w-10 h-10 sm:w-12 sm:h-12 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-zinc-100 dark:hover:bg-zinc-800 ${
+            isTransitioning ? 'opacity-70 cursor-wait' : ''
+          }`}
           aria-label={mounted ? `Switch to ${theme === "dark" ? "light" : "dark"} mode` : "Toggle theme"}
         >
-          <Sun className="h-5 w-5 sm:h-6 sm:w-6 rotate-0 scale-100 transition-all duration-500 ease-in-out dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-5 w-5 sm:h-6 sm:w-6 rotate-90 scale-0 transition-all duration-500 ease-in-out dark:rotate-0 dark:scale-100" />
+          {/* Sun Icon - rotates out and fades */}
+          <Sun 
+            className={`absolute h-5 w-5 sm:h-6 sm:w-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+              theme === "dark" 
+                ? 'rotate-[360deg] scale-0 opacity-0' 
+                : 'rotate-0 scale-100 opacity-100'
+            }`}
+            style={{
+              filter: theme === "dark" ? 'none' : 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.5))',
+              transition: 'all 700ms cubic-bezier(0.4, 0, 0.2, 1), filter 700ms ease-in-out'
+            }}
+          />
+          {/* Moon Icon - rotates in and fades */}
+          <Moon 
+            className={`absolute h-5 w-5 sm:h-6 sm:w-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+              theme === "dark" 
+                ? 'rotate-0 scale-100 opacity-100' 
+                : 'rotate-[-360deg] scale-0 opacity-0'
+            }`}
+            style={{
+              filter: theme === "dark" ? 'drop-shadow(0 0 4px rgba(147, 197, 253, 0.5))' : 'none',
+              transition: 'all 700ms cubic-bezier(0.4, 0, 0.2, 1), filter 700ms ease-in-out'
+            }}
+          />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </header>
@@ -343,12 +383,21 @@ export default function Page() {
               </div>
             </div>
             
-            {/* Logo */}
-            <div className="hidden lg:block">
-              <img 
-                src={logoImage.src} 
-                alt="Logo" 
-                className="w-72 h-72 xl:w-80 xl:h-80 rounded-lg object-cover border-2 border-zinc-200 dark:border-zinc-700 shadow-xl"
+            {/* Matrix Component - aligned with top of heading */}
+            <div className="hidden lg:flex items-start justify-center self-start">
+              <RandomMatrix
+                rows={20}
+                cols={20}
+                fps={15}
+                size={8}
+                gap={3}
+                patternChangeInterval={4000}
+                palette={{
+                  on: "#ffffff",
+                  off: "#000000",
+                }}
+                ariaLabel="Random matrix patterns"
+                className="rounded-lg border-2 border-zinc-200 dark:border-zinc-700 shadow-xl p-4 bg-black"
               />
             </div>
           </div>

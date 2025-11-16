@@ -55,7 +55,7 @@ const TimeCounter = ({ startDate }) => {
   return (
     <span 
       aria-live="polite" 
-      className="font-mono text-base sm:text-xl md:text-2xl tabular-nums text-white dark:text-white transition-all duration-500 ease-out"
+      className="font-mono text-base sm:text-lg md:text-xl tabular-nums text-zinc-600 dark:text-zinc-400 transition-all duration-500 ease-out"
       style={{ willChange: 'contents' }}
     >
       {timeElapsed}
