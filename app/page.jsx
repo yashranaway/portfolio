@@ -17,6 +17,7 @@ import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect
 import { RandomMatrix } from "@/components/ui/matrix"
 import githubAvatar from "@/assets/githubphotu.jpg"
 import linkedinAvatar from "@/assets/linkedinphotu.jpg"
+import batcatAvatar from "@/assets/batcat.jpg"
 
 
 // Clean Skill Card Component with modern skill-icons
@@ -361,23 +362,56 @@ export default function Page() {
                   
                   <p className="text-base sm:text-lg md:text-xl text-zinc-600 dark:text-zinc-400">
                     I live in Pune, Maharashtra. You can keep up with me on{" "}
-                    <a
+                    <LinkPreview
+                      title="LinkedIn • Aditya Garud"
+                      subtitle="Technical Lead • TekLingo"
                       href="https://www.linkedin.com/in/aditya-garud-8b633a303"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-zinc-900 dark:text-white font-medium hover:underline"
+                      avatar={linkedinAvatar}
+                      position="bottom"
                     >
-                      LinkedIn
-                    </a>{" "}
-                    or{" "}
-                    <a
+                      <a
+                        href="https://www.linkedin.com/in/aditya-garud-8b633a303"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-zinc-900 dark:text-white font-medium hover:underline"
+                      >
+                        LinkedIn
+                      </a>
+                    </LinkPreview>
+                    {", "}
+                    <LinkPreview
+                      title="X • yashranaway"
+                      subtitle="Follow me on X"
+                      href="https://x.com/yashranaway"
+                      avatar={batcatAvatar}
+                      position="bottom"
+                    >
+                      <a
+                        href="https://x.com/yashranaway"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-zinc-900 dark:text-white font-medium hover:underline"
+                      >
+                        <span className="font-bold tracking-tight" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>𝕏</span>
+                      </a>
+                    </LinkPreview>
+                    {" or "}
+                    <LinkPreview
+                      title="GitHub • yashranaway"
+                      subtitle="Open-source projects and profile"
                       href="https://github.com/yashranaway"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-zinc-900 dark:text-white font-medium hover:underline"
+                      avatar={githubAvatar}
+                      position="bottom"
                     >
-                      GitHub
-                    </a>.
+                      <a
+                        href="https://github.com/yashranaway"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-zinc-900 dark:text-white font-medium hover:underline"
+                      >
+                        GitHub
+                      </a>
+                    </LinkPreview>.
                   </p>
                 </div>
               </div>
@@ -733,6 +767,25 @@ export default function Page() {
                 aria-label="Connect with me on LinkedIn"
               >
                   <span>LinkedIn</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
+                </a>
+              </LinkPreview>
+              
+              <LinkPreview
+                title="X • yashranaway"
+                subtitle="Follow me on X"
+                href="https://x.com/yashranaway"
+                avatar={batcatAvatar}
+                position="bottom"
+              >
+                <a
+                  href="https://x.com/yashranaway"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-900 dark:text-white relative inline-block group"
+                  aria-label="Follow me on X"
+                >
+                  <span className="font-bold tracking-tight" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>𝕏</span>
                   <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
                 </a>
               </LinkPreview>
