@@ -262,7 +262,7 @@ export default function Page() {
         {/* Interactive Ripple Grid Background */}
         <BackgroundRippleEffect rows={20} cols={40} cellSize={50} />
       {/* Header */}
-      <header className="container mx-auto px-4 py-6 flex justify-center items-center animate-fade-in relative z-50">
+      <header className="container mx-auto px-4 py-4 sm:py-6 flex justify-center items-center animate-fade-in relative z-50">
         <Button
           variant="ghost"
           size="icon"
@@ -274,27 +274,27 @@ export default function Page() {
           }`}
           aria-label={mounted ? `Switch to ${theme === "dark" ? "light" : "dark"} mode` : "Toggle theme"}
         >
-          {/* Sun Icon - rotates out and fades */}
+          {/* Sun Icon - shows in dark mode to switch to light */}
           <Sun 
             className={`absolute h-5 w-5 sm:h-6 sm:w-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
               theme === "dark" 
-                ? 'rotate-[360deg] scale-0 opacity-0' 
-                : 'rotate-0 scale-100 opacity-100'
+                ? 'rotate-0 scale-100 opacity-100' 
+                : 'rotate-[360deg] scale-0 opacity-0'
             }`}
             style={{
-              filter: theme === "dark" ? 'none' : 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.5))',
+              filter: theme === "dark" ? 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.5))' : 'none',
               transition: 'all 700ms cubic-bezier(0.4, 0, 0.2, 1), filter 700ms ease-in-out'
             }}
           />
-          {/* Moon Icon - rotates in and fades */}
+          {/* Moon Icon - shows in light mode to switch to dark */}
           <Moon 
             className={`absolute h-5 w-5 sm:h-6 sm:w-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
               theme === "dark" 
-                ? 'rotate-0 scale-100 opacity-100' 
-                : 'rotate-[-360deg] scale-0 opacity-0'
+                ? 'rotate-[-360deg] scale-0 opacity-0' 
+                : 'rotate-0 scale-100 opacity-100'
             }`}
             style={{
-              filter: theme === "dark" ? 'drop-shadow(0 0 4px rgba(147, 197, 253, 0.5))' : 'none',
+              filter: theme === "dark" ? 'none' : 'drop-shadow(0 0 4px rgba(147, 197, 253, 0.5))',
               transition: 'all 700ms cubic-bezier(0.4, 0, 0.2, 1), filter 700ms ease-in-out'
             }}
           />
@@ -303,11 +303,11 @@ export default function Page() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-16 sm:space-y-20 lg:space-y-24 max-w-7xl relative z-50" role="main">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12 space-y-12 sm:space-y-16 md:space-y-20 lg:space-y-24 max-w-7xl relative z-50" role="main">
         {/* Hero Section */}
-        <section className="space-y-6 animate-fade-in-up flex flex-col items-center" aria-labelledby="hero-heading" itemScope itemType="https://schema.org/Person">
-          <div className="flex items-start justify-center gap-8 w-full max-w-5xl">
-            <div className="flex-1 space-y-6">
+        <section className="space-y-4 sm:space-y-6 animate-fade-in-up flex flex-col items-center" aria-labelledby="hero-heading" itemScope itemType="https://schema.org/Person">
+          <div className="flex flex-col lg:flex-row items-start justify-center gap-6 lg:gap-8 w-full max-w-5xl">
+            <div className="flex-1 space-y-4 sm:space-y-6 w-full">
               <ClickSpark
                 sparkColor="#ffffff"
                 sparkSize={12}
@@ -333,25 +333,25 @@ export default function Page() {
                 </h1>
               </ClickSpark>
               
-              <div className="space-y-6 max-w-3xl">
-                <p className="text-base sm:text-lg md:text-xl text-zinc-600 dark:text-zinc-400 -mt-2">
+              <div className="space-y-4 sm:space-y-6 max-w-3xl">
+                <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 -mt-2">
                   been here for <TimeCounter startDate={new Date("2005-01-03")} /> years
                 </p>
           
-                <div className="space-y-3">
-                  <h2 className="text-lg sm:text-xl font-medium text-zinc-900 dark:text-white">about;</h2>
+                <div className="space-y-2 sm:space-y-3">
+                  <h2 className="text-base sm:text-lg md:text-xl font-medium text-zinc-900 dark:text-white">about;</h2>
                   
-                  <p className="text-base sm:text-lg md:text-xl text-zinc-600 dark:text-zinc-400">
+                  <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     i like technology and Machine Learning, cool stuff
                   </p>
                   
-                  <p className="text-base sm:text-lg md:text-xl text-zinc-600 dark:text-zinc-400">
+                  <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     Studying at{" "}
                     <a
                       href="https://www.vupune.ac.in/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-zinc-900 dark:text-white font-medium hover:underline"
+                      className="text-zinc-900 dark:text-white font-medium hover:underline break-words"
                       itemProp="alumniOf"
                     >
                       Vishwakarma University
@@ -360,7 +360,7 @@ export default function Page() {
                     <span className="text-zinc-900 dark:text-white font-medium" itemProp="worksFor">TekLingo</span>
                   </p>
                   
-                  <p className="text-base sm:text-lg md:text-xl text-zinc-600 dark:text-zinc-400">
+                  <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     I live in Pune, Maharashtra. You can keep up with me on{" "}
                     <LinkPreview
                       title="LinkedIn • Aditya Garud"
@@ -418,7 +418,7 @@ export default function Page() {
             </div>
             
             {/* Matrix Component - aligned with top of heading */}
-            <div className="hidden lg:flex items-start justify-center self-start">
+            <div className="hidden lg:flex items-start justify-center self-start flex-shrink-0">
               <RandomMatrix
                 rows={20}
                 cols={20}
@@ -426,12 +426,15 @@ export default function Page() {
                 size={8}
                 gap={3}
                 patternChangeInterval={4000}
-                palette={{
+                palette={mounted && theme === "dark" ? {
                   on: "#ffffff",
                   off: "#000000",
+                } : {
+                  on: "#000000",
+                  off: "#ffffff",
                 }}
                 ariaLabel="Random matrix patterns"
-                className="rounded-lg border-2 border-zinc-200 dark:border-zinc-700 shadow-xl p-4 bg-black"
+                className="rounded-lg border-2 border-zinc-600 dark:border-zinc-500 shadow-xl p-3 lg:p-4 bg-white dark:bg-black"
               />
             </div>
           </div>
@@ -439,21 +442,21 @@ export default function Page() {
 
 
         {/* Technical Skills Section */}
-        <section className="space-y-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          <h2 className="text-2xl sm:text-3xl font-medium text-center text-zinc-900 dark:text-white">
+        <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-center text-zinc-900 dark:text-white">
             Technical Arsenal
          </h2>
           
           {/* Programming Languages */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr items-stretch">
-            <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-4">
-              <h3 className="text-lg font-medium text-zinc-900 dark:text-white">Programming Languages</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 auto-rows-fr items-stretch">
+            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
+              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">Programming Languages</h3>
                 <div className="flex flex-wrap gap-2 items-start w-full">
                   {skillsData.languages.map((skill) => {
                     const chip = (
-                      <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-5 h-5" loading="lazy" />
-                        <span className="text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
+                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
+                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
                     if (skill.name === 'C') {
@@ -489,14 +492,14 @@ export default function Page() {
                 </div>
             </div>
 
-            <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-4">
-              <h3 className="text-lg font-medium text-zinc-900 dark:text-white">Frontend Development</h3>
+            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
+              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">Frontend Development</h3>
                 <div className="flex flex-wrap gap-2 items-start">
                   {skillsData.frontend.map((skill) => {
                     const chip = (
-                      <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-5 h-5" loading="lazy" />
-                        <span className="text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
+                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
+                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
                     const map = {
@@ -522,14 +525,14 @@ export default function Page() {
                 </div>
             </div>
 
-            <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-4">
-              <h3 className="text-lg font-medium text-zinc-900 dark:text-white">Backend & Databases</h3>
+            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
+              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">Backend & Databases</h3>
                 <div className="flex flex-wrap gap-2 items-start">
                   {skillsData.backend.map((skill) => {
                     const chip = (
-                      <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-5 h-5" loading="lazy" />
-                        <span className="text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
+                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
+                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
                     const map = {
@@ -555,14 +558,14 @@ export default function Page() {
                 </div>
             </div>
 
-            <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-4">
-              <h3 className="text-lg font-medium text-zinc-900 dark:text-white">AI & Machine Learning</h3>
+            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
+              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">AI & Machine Learning</h3>
                 <div className="flex flex-wrap gap-2 items-start">
                   {skillsData.ai.map((skill) => {
                     const chip = (
-                      <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-5 h-5" loading="lazy" />
-                        <span className="text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
+                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
+                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
                     const map = {
@@ -587,14 +590,14 @@ export default function Page() {
                 </div>
             </div>
 
-            <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-4">
-              <h3 className="text-lg font-medium text-zinc-900 dark:text-white">DevOps & Tools</h3>
+            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
+              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">DevOps & Tools</h3>
                 <div className="flex flex-wrap gap-2 items-start">
                   {skillsData.tools.map((skill) => {
                     const chip = (
-                      <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-5 h-5" loading="lazy" />
-                        <span className="text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
+                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
+                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
                     const map = {
@@ -622,14 +625,14 @@ export default function Page() {
                 </div>
             </div>
 
-            <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-4">
-              <h3 className="text-lg font-medium text-zinc-900 dark:text-white">Specialized Skills</h3>
+            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
+              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">Specialized Skills</h3>
                 <div className="flex flex-wrap gap-2 items-start">
                   {[...skillsData.hardware, ...skillsData.other].map((skill) => {
                     const chip = (
-                      <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-5 h-5" loading="lazy" />
-                        <span className="text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
+                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
+                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
                     const map = {
@@ -657,11 +660,11 @@ export default function Page() {
           </div>
         </section>
         {/* Projects Section */}
-        <section className="space-y-12 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-          <h2 className="text-2xl sm:text-3xl text-center font-medium text-zinc-900 dark:text-white">
+        <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+          <h2 className="text-xl sm:text-2xl md:text-3xl text-center font-medium text-zinc-900 dark:text-white">
             Projects
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 auto-rows-auto">
             {[
                 {
                   title: "NetPulse Monitor",
@@ -713,7 +716,7 @@ export default function Page() {
                 key={project.title}
                 onMouseEnter={() => setHoveredProject(index)}
                 onMouseLeave={() => setHoveredProject(null)}
-                className={`relative p-6 rounded-xl bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 transition-all duration-300 ${
+                className={`relative p-4 sm:p-6 rounded-xl bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 transition-all duration-300 ${
                   project.size === 'large' ? 'md:col-span-2 lg:col-span-2' : 
                   project.size === 'medium' ? 'md:col-span-2 lg:col-span-1' : 
                   ''
@@ -721,11 +724,11 @@ export default function Page() {
                   hoveredProject !== null && hoveredProject !== index ? 'blur-sm scale-[0.98] opacity-60' : 'shadow-lg'
                 }`}
               >
-                <div className="flex flex-col h-full gap-3">
-                  <h3 className="text-lg font-medium text-zinc-900 dark:text-white transition-colors">
+                <div className="flex flex-col h-full gap-2 sm:gap-3">
+                  <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white transition-colors">
                     {project.title}
                   </h3>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed flex-1">
+                  <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed flex-1">
                     {project.description}
                   </p>
                 </div>
@@ -735,23 +738,23 @@ export default function Page() {
         </section>
 
         {/* Contact Section */}
-        <section className="space-y-12 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
-          <h2 className="text-2xl sm:text-3xl font-medium text-zinc-900 dark:text-white">
+        <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-zinc-900 dark:text-white">
             Get in touch
           </h2>
-          <div className="space-y-6">
-            <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          <div className="space-y-4 sm:space-y-6">
+            <p className="text-sm sm:text-base md:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
               Based in Pune, Maharashtra. You can reach me at{" "}
               <a
                 href="mailto:garudaditya079@gmail.com"
-                className="text-zinc-900 dark:text-white relative inline-block group"
+                className="text-zinc-900 dark:text-white relative inline-block group break-all sm:break-normal"
               >
                 <span>garudaditya079@gmail.com</span>
                 <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
               </a>
             </p>
             
-            <div className="flex flex-wrap items-center gap-6">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6">
               <LinkPreview
                 title="LinkedIn • Aditya Garud"
                 subtitle="Technical Lead • TekLingo"
@@ -836,8 +839,8 @@ export default function Page() {
         </section>
 
         {/* Credit Section */}
-        <section className="text-center py-8 border-t border-zinc-200 dark:border-zinc-700">
-          <p className="text-sm text-zinc-500 dark:text-zinc-500 flex items-center justify-center gap-2">
+        <section className="text-center py-6 sm:py-8 border-t border-zinc-200 dark:border-zinc-700">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-500 flex flex-wrap items-center justify-center gap-2 px-4">
             <Heart className="w-4 h-4 text-red-400" />
             Design inspired by{" "}
             <a
@@ -857,13 +860,13 @@ export default function Page() {
 
       {/* Resume Modal */}
       {showResume && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
-          <div className="w-[min(95vw,1000px)] h-[min(90vh,900px)] max-h-[90vh] bg-white dark:bg-zinc-900 rounded-lg shadow-2xl border border-zinc-200 dark:border-zinc-700 flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-200 dark:border-zinc-700">
-              <h3 className="text-sm font-medium text-zinc-900 dark:text-white">Resume — Aditya Garud</h3>
-              <div className="flex items-center gap-2">
-                <a href="/AdityaGarudResume.pdf" download target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white text-sm" data-no-letter>
-                  <Download className="w-4 h-4" />
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-2 sm:p-4" role="dialog" aria-modal="true">
+          <div className="w-[min(98vw,1000px)] h-[min(95vh,900px)] max-h-[95vh] bg-white dark:bg-zinc-900 rounded-lg shadow-2xl border border-zinc-200 dark:border-zinc-700 flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-zinc-200 dark:border-zinc-700">
+              <h3 className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white truncate flex-1 mr-2">Resume — Aditya Garud</h3>
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                <a href="/AdityaGarudResume.pdf" download target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white text-xs sm:text-sm" data-no-letter>
+                  <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Download</span>
                 </a>
                 <button onClick={() => setShowResume(false)} className="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Close resume" data-no-letter>
@@ -872,7 +875,7 @@ export default function Page() {
               </div>
             </div>
             <div className="flex-1 bg-zinc-50 dark:bg-zinc-950 overflow-auto">
-              <iframe src="/AdityaGarudResume.pdf#view=FitH" className="w-full h-full min-h-[500px]" title="Resume PDF" />
+              <iframe src="/AdityaGarudResume.pdf#view=FitH" className="w-full h-full min-h-[400px] sm:min-h-[500px]" title="Resume PDF" />
             </div>
           </div>
         </div>
