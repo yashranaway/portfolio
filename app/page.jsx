@@ -142,15 +142,6 @@ export default function Page() {
   const [contributions, setContributions] = useState([])
   const [totalContributions, setTotalContributions] = useState(0)
   const [contributionsLoading, setContributionsLoading] = useState(true)
-  const [visitorCount, setVisitorCount] = useState(null)
-
-  // Fetch and increment visitor count
-  useEffect(() => {
-    fetch('https://api.counterapi.dev/v1/aditya-garud-portfolio/visits/up')
-      .then(r => r.json())
-      .then(data => { if (data.count) setVisitorCount(data.count) })
-      .catch(() => {})
-  }, [])
 
   // Fetch GitHub contributions from public API
   useEffect(() => {
@@ -953,18 +944,6 @@ export default function Page() {
           </div>
         </section>
 
-        {/* Visitor Counter */}
-        <section className="flex justify-center pt-2 pb-4">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-700/40">
-            <span className="text-zinc-400 dark:text-zinc-500 text-lg">#</span>
-            <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 tracking-wide">
-              visitor no.
-              <span className="font-bold text-zinc-900 dark:text-white ml-1.5 tabular-nums">
-                {(visitorCount || 0).toLocaleString()}
-              </span>
-            </p>
-          </div>
-        </section>
 
         {/* Credit Section */}
         <section className="text-center py-6 sm:py-8 border-t border-zinc-200 dark:border-zinc-700">
