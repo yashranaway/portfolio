@@ -1,5 +1,6 @@
 import { ThemeProvider } from "./theme-provider"
 import './globals.css'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata = {
   title: {
@@ -145,6 +146,7 @@ export default function RootLayout({ children }) {
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
