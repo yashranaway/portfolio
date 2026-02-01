@@ -15,6 +15,13 @@ import CodeHover from "@/components/CodeHover"
 import LinkPreview from "@/components/LinkPreview"
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect"
 import { RandomMatrix } from "@/components/ui/matrix"
+import { getCalApi } from "@calcom/embed-react"
+import dynamic from "next/dynamic"
+
+const ActivityCalendar = dynamic(
+  () => import("react-activity-calendar").then((mod) => mod.ActivityCalendar),
+  { ssr: false }
+)
 import githubAvatar from "@/assets/githubphotu.jpg"
 import linkedinAvatar from "@/assets/linkedinphotu.jpg"
 import batcatAvatar from "@/assets/batcat.jpg"
@@ -79,6 +86,7 @@ const skillsData = {
     { name: "TypeScript", iconUrl: "https://skillicons.dev/icons?i=ts", color: "#3178C6" },
     { name: "Rust", iconUrl: "https://skillicons.dev/icons?i=rust", color: "#CE422B" },
     { name: "Go", iconUrl: "https://skillicons.dev/icons?i=go", color: "#00ADD8" },
+    { name: "Ruby", iconUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg", color: "#CC342D" },
   ],
   frontend: [
     { name: "HTML5", iconUrl: "https://skillicons.dev/icons?i=html", color: "#E34F26" },
@@ -131,10 +139,70 @@ export default function Page() {
   const [mounted, setMounted] = useState(false)
   const [hoveredProject, setHoveredProject] = useState(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [contributions, setContributions] = useState([])
+  const [totalContributions, setTotalContributions] = useState(0)
+  const [contributionsLoading, setContributionsLoading] = useState(true)
+  const [visitorCount, setVisitorCount] = useState(null)
+
+  // Fetch and increment visitor count
+  useEffect(() => {
+    fetch('https://api.counterapi.dev/v1/aditya-garud-portfolio/visits/up')
+      .then(r => r.json())
+      .then(data => { if (data.count) setVisitorCount(data.count) })
+      .catch(() => {})
+  }, [])
+
+  // Fetch GitHub contributions from public API
+  useEffect(() => {
+    async function fetchContributions() {
+      try {
+        setContributionsLoading(true)
+        const res = await fetch('https://github-contributions-api.deno.dev/yashranaway.json')
+        const data = await res.json()
+
+        if (data?.contributions && Array.isArray(data.contributions)) {
+          const levelMap = { NONE: 0, FIRST_QUARTILE: 1, SECOND_QUARTILE: 2, THIRD_QUARTILE: 3, FOURTH_QUARTILE: 4 }
+          const mapped = data.contributions.flat()
+            .filter(item => item && item.date && 'contributionCount' in item && 'contributionLevel' in item)
+            .map(item => ({
+              date: item.date,
+              count: Number(item.contributionCount || 0),
+              level: (levelMap[item.contributionLevel] || 0),
+            }))
+
+          // Filter to last year
+          const oneYearAgo = new Date()
+          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+          const filtered = mapped.filter(item => new Date(item.date) >= oneYearAgo)
+
+          setTotalContributions(mapped.reduce((sum, item) => sum + item.count, 0))
+          setContributions(filtered)
+        }
+      } catch (e) {
+        // silently fail
+      } finally {
+        setContributionsLoading(false)
+      }
+    }
+    fetchContributions()
+  }, [])
 
   // Prevent hydration mismatch by only rendering theme-dependent content after mount
   useEffect(() => {
     setMounted(true)
+  }, [])
+
+  // Cal.com floating button
+  useEffect(() => {
+    (async function () {
+      const cal = await getCalApi({ namespace: "secret" })
+      cal("floatingButton", {
+        calLink: "aditya-garud/secret",
+        config: { layout: "month_view", useSlotsViewOnSmallScreen: "true" },
+        buttonText: "Call",
+      })
+      cal("ui", { hideEventTypeDetails: false, layout: "month_view" })
+    })()
   }, [])
 
   // Handle theme switch with smooth lazy animation
@@ -355,16 +423,14 @@ export default function Page() {
                       itemProp="alumniOf"
                     >
                       Vishwakarma University
-                    </a>{" "}
-                    | <span itemProp="jobTitle">Technical Lead</span> at{" "}
-                    <span className="text-zinc-900 dark:text-white font-medium" itemProp="worksFor">TekLingo</span>
+                    </a>
                   </p>
                   
                   <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     I live in Pune, Maharashtra. You can keep up with me on{" "}
                     <LinkPreview
                       title="LinkedIn • Aditya Garud"
-                      subtitle="Technical Lead • TekLingo"
+                      subtitle="Full Stack Developer & ML Engineer"
                       href="https://www.linkedin.com/in/aditya-garud-8b633a303"
                       avatar={linkedinAvatar}
                       position="bottom"
@@ -441,6 +507,54 @@ export default function Page() {
         </section>
 
 
+        {/* GitHub Activity */}
+        <section className="space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          {contributionsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
+            </div>
+          ) : contributions.length > 0 ? (
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-4 sm:p-6 w-fit mx-auto max-w-full overflow-x-auto">
+              <ActivityCalendar
+                data={contributions}
+                blockSize={14}
+                blockMargin={5}
+                blockRadius={3}
+                fontSize={13}
+                colorScheme={mounted && theme === 'dark' ? 'dark' : 'light'}
+                maxLevel={4}
+                hideTotalCount={false}
+                hideColorLegend={false}
+                hideMonthLabels={false}
+                theme={{
+                  dark: [
+                    'rgb(22, 27, 34)',
+                    'rgb(14, 68, 41)',
+                    'rgb(0, 109, 50)',
+                    'rgb(38, 166, 65)',
+                    'rgb(57, 211, 83)',
+                  ],
+                  light: [
+                    'rgb(235, 237, 240)',
+                    'rgb(155, 233, 168)',
+                    'rgb(64, 196, 99)',
+                    'rgb(48, 161, 78)',
+                    'rgb(33, 110, 57)',
+                  ],
+                }}
+                labels={{
+                  months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                  weekdays: ['', 'Mon', '', 'Wed', '', 'Fri', ''],
+                  totalCount: '{{count}} contributions in the last year',
+                }}
+                style={{
+                  color: mounted && theme === 'dark' ? 'rgb(139, 148, 158)' : 'rgb(100, 100, 100)',
+                }}
+              />
+            </div>
+          ) : null}
+        </section>
+
         {/* Technical Skills Section */}
         <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-center text-zinc-900 dark:text-white">
@@ -474,6 +588,7 @@ export default function Page() {
                       'TypeScript': 'typescript',
                       'Rust': 'rust',
                       'Go': 'go',
+                      'Ruby': 'ruby',
                     }
                     const langKey = map[skill.name]
                     if (langKey) {
@@ -757,7 +872,7 @@ export default function Page() {
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6">
               <LinkPreview
                 title="LinkedIn • Aditya Garud"
-                subtitle="Technical Lead • TekLingo"
+                subtitle="Full Stack Developer & ML Engineer"
                 href="https://www.linkedin.com/in/aditya-garud-8b633a303"
                 avatar={linkedinAvatar}
                 position="bottom"
@@ -835,6 +950,19 @@ export default function Page() {
                 <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
               </button>
             </div>
+          </div>
+        </section>
+
+        {/* Visitor Counter */}
+        <section className="flex justify-center pt-2 pb-4">
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-700/40">
+            <span className="text-zinc-400 dark:text-zinc-500 text-lg">#</span>
+            <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 tracking-wide">
+              visitor no.
+              <span className="font-bold text-zinc-900 dark:text-white ml-1.5 tabular-nums">
+                {(visitorCount || 0).toLocaleString()}
+              </span>
+            </p>
           </div>
         </section>
 

@@ -330,6 +330,24 @@ export default function CodeHover({
       ],
       output: "hey, there aditya here.",
     },
+    ruby: {
+      label: "Ruby",
+      tokens: [
+        { t: "def", c: "text-purple-400" },
+        { t: " ", c: "" },
+        { t: "greet", c: "text-emerald-400" },
+        { t: "\n  ", c: "" },
+        { t: "puts", c: "text-emerald-400" },
+        { t: " ", c: "" },
+        { t: "\"hey, there aditya here.\"", c: "text-amber-300" },
+        { t: "\n", c: "" },
+        { t: "end", c: "text-purple-400" },
+        { t: "\n\n", c: "" },
+        { t: "greet", c: "text-emerald-400" },
+        { t: "\n", c: "" },
+      ],
+      output: "hey, there aditya here.",
+    },
     go: {
       label: "Go",
       tokens: [
