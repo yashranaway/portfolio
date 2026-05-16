@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
-import { Sun, Moon, Heart, Download, X } from "lucide-react"
+import { Sun, Moon, Heart, Download, X, GitMerge } from "lucide-react"
 import { useState, useEffect } from "react"
 
 
@@ -131,6 +131,120 @@ const skillsData = {
     { name: "Discord.py", iconUrl: "/icons/discordpy.png", color: "#3776AB" },
   ]
 }
+
+// Open Source contributions (curated, merged-only)
+const openSourceData = [
+  {
+    key: "antiwork",
+    iconUrl: "https://github.com/gumroad.png?size=128",
+    label: "antiwork",
+    sub: "Gumroad · 2 repos",
+    merged: 19,
+    repos: [
+      {
+        repo: "antiwork/gumroad",
+        merged: 18,
+        prs: [
+          { num: 2810, title: "Auto-suspend creators sharing ACH via stripe fingerprints" },
+          { num: 3066, title: "Preserve offer-code discount for installments" },
+          { num: 2384, title: "Migrate payouts to Inertia" },
+          { num: 2270, title: "Auto-apply VAT ID to recurring subscription charges" },
+          { num: 2769, title: "Add sendgrid resend fallback" },
+        ],
+      },
+      {
+        repo: "antiwork/gumroad-mobile",
+        merged: 1,
+        prs: [
+          { num: 70, title: "Native table-of-contents navigation for multi-page products" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "dodopayments",
+    iconUrl: "https://github.com/dodopayments.png?size=128",
+    label: "dodopayments",
+    sub: "3 repos",
+    merged: 20,
+    repos: [
+      {
+        repo: "dodopayments/billingsdk",
+        merged: 14,
+        prs: [
+          { num: 306, title: "Auto-discovery system for playground components" },
+          { num: 283, title: "Add Stripe support for Fastify template" },
+          { num: 338, title: "Update CI/CD for registry generation" },
+          { num: 255, title: "Fix pricing-table responsiveness" },
+          { num: 243, title: "Fix CI build warnings & overall cleanup" },
+        ],
+      },
+      {
+        repo: "dodopayments/dodo-discord-bot",
+        merged: 3,
+        prs: [
+          { num: 1, title: "Welcoming revamp with embeds" },
+          { num: 4, title: "Auto-thread feature" },
+          { num: 3, title: "Ping command for latency metrics" },
+        ],
+      },
+      {
+        repo: "dodopayments/dodo-migrate",
+        merged: 3,
+        prs: [
+          { num: 6, title: "Add Stripe provider integration" },
+          { num: 7, title: "Add Coupons migration for Lemon Squeezy" },
+          { num: 9, title: "Specify product types for Stripe migration" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "digitalocean",
+    iconUrl: "https://github.com/digitalocean.png?size=128",
+    label: "digitalocean/gradient-typescript",
+    merged: 1,
+    repos: [
+      {
+        repo: "digitalocean/gradient-typescript",
+        merged: 1,
+        prs: [
+          { num: 8, title: "waitForDatabase polling helper for knowledge bases" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "ghostfolio",
+    iconUrl: "https://github.com/ghostfolio.png?size=128",
+    label: "ghostfolio/ghostfolio",
+    merged: 1,
+    repos: [
+      {
+        repo: "ghostfolio/ghostfolio",
+        merged: 1,
+        prs: [
+          { num: 5656, title: "Preselect first search result in assistant" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "different-ai",
+    iconUrl: "https://github.com/different-ai.png?size=128",
+    label: "different-ai/openwork",
+    merged: 1,
+    repos: [
+      {
+        repo: "different-ai/openwork",
+        merged: 1,
+        prs: [
+          { num: 1567, title: "Forward --opencode-log-level to managed opencode serve" },
+        ],
+      },
+    ],
+  },
+]
 
 export default function Page() {
   const { theme, setTheme } = useTheme()
@@ -765,6 +879,112 @@ export default function Page() {
 
           </div>
         </section>
+
+        {/* Open Source Section */}
+        <section
+          className="space-y-6 sm:space-y-8 animate-fade-in-up opensrc"
+          style={{ animationDelay: '0.5s' }}
+          data-no-letter
+        >
+          <div className="flex items-baseline justify-between gap-4 flex-wrap">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-zinc-900 dark:text-white">
+              Open Source
+            </h2>
+            <p className="text-xs sm:text-sm font-mono text-zinc-500 dark:text-zinc-400">
+              42 merged · 5 orgs · 7 repos
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm overflow-hidden">
+            {openSourceData.map((org, i) => {
+              const single = org.repos.length === 1
+              const isLast = i === openSourceData.length - 1
+              return (
+                <details key={org.key} className={!isLast ? "border-b border-zinc-200 dark:border-zinc-700" : ""}>
+                  <summary className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
+                    <span className="opensrc-chev font-mono text-zinc-400 text-sm">›</span>
+                    <img
+                      src={org.iconUrl}
+                      alt=""
+                      aria-hidden
+                      className="w-6 h-6 rounded ring-1 ring-zinc-200 dark:ring-zinc-700 flex-shrink-0"
+                      loading="lazy"
+                    />
+                    <span className="font-mono text-sm flex-1 text-zinc-900 dark:text-white truncate">
+                      {org.label}
+                      {org.sub ? <span className="text-zinc-500"> · {org.sub}</span> : null}
+                    </span>
+                    <span className="font-mono text-xs tabular-nums text-zinc-500 flex-shrink-0">
+                      {org.merged} merged
+                    </span>
+                  </summary>
+
+                  <div className="pl-6 sm:pl-12 pr-4 pb-4">
+                    {single ? (
+                      <ul className="mt-2 pl-4 sm:pl-5 border-l border-zinc-200 dark:border-zinc-700 space-y-1.5 text-sm">
+                        {org.repos[0].prs.map((pr) => (
+                          <li key={pr.num} className="flex items-start gap-2">
+                            <GitMerge
+                              className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-[#8957e5] dark:text-[#a371f7]"
+                              aria-label="merged"
+                            />
+                            <a
+                              href={`https://github.com/${org.repos[0].repo}/pull/${pr.num}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-zinc-700 dark:text-zinc-300 hover:underline leading-snug break-words"
+                            >
+                              {pr.title}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      org.repos.map((repo, ri) => (
+                        <details key={repo.repo} className={ri === 0 ? "mt-2" : "mt-3"}>
+                          <summary className="flex items-center gap-2 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 rounded">
+                            <span className="opensrc-chev font-mono text-zinc-400 text-xs">›</span>
+                            <a
+                              href={`https://github.com/${repo.repo}/pulls?q=is%3Apr+author%3Ayashranaway+is%3Amerged`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="font-mono text-xs text-zinc-700 dark:text-zinc-300 hover:underline truncate"
+                            >
+                              {repo.repo}
+                            </a>
+                            <span className="font-mono text-[10px] text-zinc-500 ml-auto flex-shrink-0">
+                              {repo.merged} merged ↗
+                            </span>
+                          </summary>
+                          <ul className="mt-1.5 pl-4 sm:pl-5 border-l border-zinc-200 dark:border-zinc-700 space-y-1.5 text-sm">
+                            {repo.prs.map((pr) => (
+                              <li key={pr.num} className="flex items-start gap-2">
+                                <GitMerge
+                                  className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-[#8957e5] dark:text-[#a371f7]"
+                                  aria-label="merged"
+                                />
+                                <a
+                                  href={`https://github.com/${repo.repo}/pull/${pr.num}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-zinc-700 dark:text-zinc-300 hover:underline leading-snug break-words"
+                                >
+                                  {pr.title}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      ))
+                    )}
+                  </div>
+                </details>
+              )
+            })}
+          </div>
+        </section>
+
         {/* Projects Section */}
         <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
           <h2 className="text-xl sm:text-2xl md:text-3xl text-center font-medium text-zinc-900 dark:text-white">

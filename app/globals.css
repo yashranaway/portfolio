@@ -720,6 +720,12 @@
   animation: cell-ripple var(--duration, 800ms) ease-out var(--delay, 0ms);
 }
 
+/* Open Source section — accordion chevron + native details polish */
+.opensrc summary { list-style: none; cursor: pointer; }
+.opensrc summary::-webkit-details-marker { display: none; }
+.opensrc-chev { display: inline-block; transition: transform 0.25s ease; }
+.opensrc details[open] > summary .opensrc-chev { transform: rotate(90deg); }
+
 /* Reduced motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,
