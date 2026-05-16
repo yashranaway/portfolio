@@ -3,13 +3,16 @@
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
-export default function LinkPreview({ children, title, subtitle, href, avatar, position = "top" }) {
-  const [hovering, setHovering] = useState(false)
+export default function LinkPreview({ children, title, subtitle, href, avatar, position = "top", badge }) {
+  const [triggerHover, setTriggerHover] = useState(false)
+  const [popupHover, setPopupHover] = useState(false)
+  const hovering = triggerHover || popupHover
   const triggerRef = useRef(null)
   const popupRef = useRef(null)
+  const triggerTimerRef = useRef(null)
+  const popupTimerRef = useRef(null)
   const [posStyle, setPosStyle] = useState({ top: 0, left: 0 })
 
-  // Compute fixed coordinates so the preview is portaled outside any <p>
   useEffect(() => {
     if (!hovering) return
     const compute = () => {
@@ -17,17 +20,17 @@ export default function LinkPreview({ children, title, subtitle, href, avatar, p
       if (!el) return
       const rect = el.getBoundingClientRect()
       const popup = popupRef.current
-      const gap = 12 // space between trigger and tooltip
+      const gap = 12
       const vw = window.innerWidth
       const vh = window.innerHeight
       const margin = 8
-      const w = Math.min(popup?.offsetWidth || 320, Math.floor(vw * 0.9))
-      const h = Math.min(popup?.offsetHeight || 200, Math.floor(vh * 0.5))
+      const w = Math.min(popup?.offsetWidth || 360, Math.floor(vw * 0.92))
+      const h = Math.min(popup?.offsetHeight || 240, Math.floor(vh * 0.7))
       const cx = rect.left + rect.width / 2
       const left = Math.min(Math.max(cx - w / 2, margin), vw - margin - w)
-      let top = rect.bottom + gap; // Prefer below
+      let top = rect.bottom + gap
       if (top > vh - margin - h) {
-        top = rect.top - gap - h; // Flip to above if no space
+        top = rect.top - gap - h
       }
       top = Math.min(Math.max(top, margin), vh - margin - h)
       setPosStyle({ top, left })
@@ -41,37 +44,96 @@ export default function LinkPreview({ children, title, subtitle, href, avatar, p
     }
   }, [hovering, position])
 
+  // Two independent timers so leaving the trigger doesn't get cancelled
+  // by re-entering the popup (or vice versa).
+  const enterTrigger = () => {
+    clearTimeout(triggerTimerRef.current)
+    setTriggerHover(true)
+  }
+  const leaveTrigger = () => {
+    clearTimeout(triggerTimerRef.current)
+    triggerTimerRef.current = setTimeout(() => setTriggerHover(false), 120)
+  }
+  const enterPopup = () => {
+    clearTimeout(popupTimerRef.current)
+    setPopupHover(true)
+  }
+  const leavePopup = () => {
+    clearTimeout(popupTimerRef.current)
+    popupTimerRef.current = setTimeout(() => setPopupHover(false), 120)
+  }
+
+  // Clean up timers on unmount.
+  useEffect(() => () => {
+    clearTimeout(triggerTimerRef.current)
+    clearTimeout(popupTimerRef.current)
+  }, [])
+
   return (
     <span
       ref={triggerRef}
       className="inline-flex"
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
+      onMouseEnter={enterTrigger}
+      onMouseLeave={leaveTrigger}
       data-no-letter
     >
       {children}
       {hovering && createPortal(
         <div
           ref={popupRef}
-          className={`fixed z-50`}
+          className="fixed z-50"
           style={{ top: posStyle.top, left: posStyle.left }}
-          aria-hidden
+          onMouseEnter={enterPopup}
+          onMouseLeave={leavePopup}
         >
-          <div className="w-[320px] max-w-[90vw] rounded-lg border border-zinc-700 bg-zinc-900/95 shadow-xl backdrop-blur px-4 py-3 animate-fade-in-up text-left">
-            <div className="flex items-center gap-3">
+          <div className="w-[360px] max-w-[92vw] rounded-lg border border-zinc-700 bg-zinc-900/95 shadow-xl backdrop-blur px-4 py-3 animate-fade-in-up text-left">
+            <div className="flex items-start gap-3">
               {avatar && (
                 <img
                   src={typeof avatar === 'string' ? avatar : (avatar?.src || undefined)}
-                  alt="avatar"
-                  className="w-7 h-7 rounded-full object-cover"
+                  alt=""
+                  aria-hidden
+                  className="w-9 h-9 rounded-full object-cover flex-shrink-0 mt-0.5"
                 />
               )}
-              <div className="min-w-0">
-                <div className="text-sm font-medium text-white truncate">{title}</div>
-                {subtitle && <div className="text-xs text-zinc-400 truncate">{subtitle}</div>}
+              <div className="min-w-0 flex-1">
+                {href ? (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block hover:underline"
+                  >
+                    <div className="text-sm font-medium text-white leading-snug break-words">{title}</div>
+                    {subtitle && (
+                      <div className="text-xs text-zinc-400 leading-snug mt-1 break-words">{subtitle}</div>
+                    )}
+                  </a>
+                ) : (
+                  <>
+                    <div className="text-sm font-medium text-white leading-snug break-words">{title}</div>
+                    {subtitle && <div className="text-xs text-zinc-400 leading-snug mt-1 break-words">{subtitle}</div>}
+                  </>
+                )}
               </div>
             </div>
-            <div className="mt-2 text-[11px] text-zinc-400 truncate">{href}</div>
+
+            {badge && (
+              <div className="mt-2.5">
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full text-white"
+                  style={{ backgroundColor: badge.color || '#8957e5' }}
+                >
+                  {badge.label}
+                </span>
+              </div>
+            )}
+
+            {href && (
+              <div className="mt-2 text-[11px] font-mono text-zinc-500 truncate">
+                {href.replace(/^https?:\/\//, '')}
+              </div>
+            )}
           </div>
         </div>,
         document.body

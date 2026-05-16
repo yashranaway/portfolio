@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
-import { Sun, Moon, Heart, Download, X, GitMerge } from "lucide-react"
+import { Sun, Moon, Heart, Download, X, GitMerge, ChevronRight, ArrowUpRight } from "lucide-react"
+import { FaXTwitter, FaGithub } from "react-icons/fa6"
 import { useState, useEffect } from "react"
 
 
@@ -26,54 +27,6 @@ import githubAvatar from "@/assets/githubphotu.jpg"
 import linkedinAvatar from "@/assets/linkedinphotu.jpg"
 import batcatAvatar from "@/assets/batcat.jpg"
 
-
-// Clean Skill Card Component with modern skill-icons
-function SkillCard({ skill, specialized = false }) {
-  return (
-    <ClickSpark
-      sparkColor={skill.color}
-      sparkSize={8}
-      sparkRadius={12}
-      sparkCount={6}
-      duration={400}
-      easing="ease-out"
-      extraScale={1.0}
-    >
-      <div
-        className={`group relative flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300 cursor-pointer hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-black overflow-hidden shadow-sm hover:shadow-md ${specialized ? 'md:col-span-1' : ''
-          }`}
-        role="button"
-        tabIndex={0}
-        aria-label={`${skill.name} technology`}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-          }
-        }}
-      >
-        {/* Skill Icon using skill-icons */}
-        <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 transition-all duration-300 group-hover:scale-110">
-          <img
-            src={skill.iconUrl}
-            alt={`${skill.name} icon`}
-            className="w-full h-full object-contain transition-all duration-300 group-hover:drop-shadow-lg"
-            loading="lazy"
-          />
-        </div>
-
-        {/* Skill Name */}
-        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white transition-colors duration-300 flex-1">
-        {skill.name}
-      </span>
-
-        {/* Enhanced Glare effect */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-200/30 dark:via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
-        </div>
-      </div>
-    </ClickSpark>
-  )
-}
 
 // Organized skills data
 const skillsData = {
@@ -132,6 +85,115 @@ const skillsData = {
   ]
 }
 
+// Project tech stack icons (uses skillicons.dev, same as the Skills section)
+const tech = {
+  ts:        { name: "TypeScript", iconUrl: "https://skillicons.dev/icons?i=ts" },
+  js:        { name: "JavaScript", iconUrl: "https://skillicons.dev/icons?i=js" },
+  py:        { name: "Python", iconUrl: "https://skillicons.dev/icons?i=python" },
+  rust:      { name: "Rust", iconUrl: "https://skillicons.dev/icons?i=rust" },
+  c:         { name: "C", iconUrl: "https://skillicons.dev/icons?i=c" },
+  nextjs:    { name: "Next.js", iconUrl: "https://skillicons.dev/icons?i=nextjs" },
+  react:     { name: "React", iconUrl: "https://skillicons.dev/icons?i=react" },
+  node:      { name: "Node.js", iconUrl: "https://skillicons.dev/icons?i=nodejs" },
+  supabase:  { name: "Supabase", iconUrl: "https://skillicons.dev/icons?i=supabase" },
+  postgres:  { name: "PostgreSQL", iconUrl: "https://skillicons.dev/icons?i=postgresql" },
+  opencv:    { name: "OpenCV", iconUrl: "https://skillicons.dev/icons?i=opencv" },
+  tensorflow:{ name: "TensorFlow", iconUrl: "https://skillicons.dev/icons?i=tensorflow" },
+  arduino:   { name: "Arduino / Embedded", iconUrl: "https://skillicons.dev/icons?i=arduino" },
+}
+
+const projectsData = [
+  {
+    title: "NetPulse Monitor",
+    description: "Decentralized uptime monitor. Independent validators verify checks and are paid via micropayments.",
+    size: "large",
+    repo: "https://github.com/yashranaway/netpulse",
+    stack: [tech.ts, tech.nextjs],
+  },
+  {
+    title: "Code-Sync Review MCP",
+    description: "MCP worker for TS/JS code analysis. Plugs into AI assistants for review, static checks, and automated patches.",
+    size: "medium",
+    repo: "https://github.com/yashranaway/CodeSyncReview_MCP",
+    stack: [tech.ts, tech.node],
+  },
+  {
+    title: "VM Rentals",
+    description: "Marketplace to spin up, manage, and bill virtual machines.",
+    size: "medium",
+    repo: "https://github.com/yashranaway/vmrentals",
+    stack: [tech.ts, tech.nextjs],
+  },
+  {
+    title: "Virtual Mouse Gesture Control",
+    description: "Hand-gesture OS control for volume, media, and system actions via real-time hand tracking.",
+    size: "medium",
+    repo: "https://github.com/yashranaway/virtual-mouse-gesture-control",
+    stack: [tech.py, tech.opencv],
+  },
+  {
+    title: "Fleet Maintenance AI",
+    description: "Predictive maintenance dashboard for industrial vehicle fleets.",
+    size: "medium",
+    repo: "https://github.com/yashranaway/industrial-fleet-maintenance-ai",
+    stack: [tech.js, tech.nextjs],
+  },
+  {
+    title: "BharatAI",
+    description: "Agent platform tuned for Indian-language workflows.",
+    size: "medium",
+    repo: "https://github.com/yashranaway/bharatai",
+    stack: [tech.py],
+  },
+  {
+    title: "Secure Tracker",
+    description: "Microcontroller-based asset tracker with GPS, NB-IoT comms, and secure charging.",
+    size: "medium",
+    repo: "https://github.com/yashranaway/-Secure-Tracker-Project",
+    stack: [tech.c, tech.arduino],
+  },
+  {
+    title: "Supabase + Dodo Payments Starter",
+    description: "SaaS starter with Supabase auth and Dodo Payments subscription billing.",
+    size: "medium",
+    repo: "https://github.com/yashranaway/supabase-dodopayments-starter",
+    stack: [tech.ts, tech.nextjs, tech.supabase],
+  },
+  {
+    title: "Discord Bot Management",
+    description: "Scalable Discord bots with moderation, custom commands, and analytics. Discord.py and PostgreSQL, 10k+ users.",
+    size: "small",
+    stack: [tech.py, tech.postgres],
+  },
+  {
+    title: "Defect Detection",
+    description: "Computer-vision defect detection for production-line QA.",
+    size: "small",
+    repo: "https://github.com/yashranaway/defect-detection",
+    stack: [tech.py, tech.tensorflow],
+  },
+  {
+    title: "Specs Try-On",
+    description: "AR eyeglasses try-on. See frames on your face via webcam.",
+    size: "small",
+    repo: "https://github.com/yashranaway/specs_try_on",
+    stack: [tech.ts, tech.react],
+  },
+  {
+    title: "Discord Tip Bot",
+    description: "Crypto tip bot for Discord. On-chain micro-transfers, built in Rust.",
+    size: "small",
+    repo: "https://github.com/yashranaway/discord-tip-bot",
+    stack: [tech.rust],
+  },
+  {
+    title: "YODHA",
+    description: "Image-recognition model for low-light scenes. Boosts clarity in poor lighting.",
+    size: "small",
+    stack: [tech.py],
+  },
+]
+
 // Open Source contributions (curated, merged-only)
 const openSourceData = [
   {
@@ -140,6 +202,10 @@ const openSourceData = [
     label: "antiwork",
     sub: "Gumroad · 2 repos",
     merged: 19,
+    name: "Gumroad",
+    description: "Creator commerce platform. Sell digital products, courses, and memberships. Now open-source under Antiwork (Sahil Lavingia).",
+    siteUrl: "https://gumroad.com",
+    accent: "#ff90e8",
     repos: [
       {
         repo: "antiwork/gumroad",
@@ -167,6 +233,10 @@ const openSourceData = [
     label: "dodopayments",
     sub: "3 repos",
     merged: 20,
+    name: "Dodo Payments",
+    description: "YC-backed global payments infrastructure. Stripe-style API for emerging markets.",
+    siteUrl: "https://dodopayments.com",
+    accent: "#A0E636",
     repos: [
       {
         repo: "dodopayments/billingsdk",
@@ -204,6 +274,10 @@ const openSourceData = [
     iconUrl: "https://github.com/digitalocean.png?size=128",
     label: "digitalocean/gradient-typescript",
     merged: 1,
+    name: "DigitalOcean",
+    description: "Cloud infrastructure for developers. Droplets, Kubernetes, managed databases.",
+    siteUrl: "https://digitalocean.com",
+    accent: "#0080FF",
     repos: [
       {
         repo: "digitalocean/gradient-typescript",
@@ -219,6 +293,10 @@ const openSourceData = [
     iconUrl: "https://github.com/ghostfolio.png?size=128",
     label: "ghostfolio/ghostfolio",
     merged: 1,
+    name: "Ghostfolio",
+    description: "Open-source wealth-management dashboard for self-directed investors.",
+    siteUrl: "https://ghostfol.io",
+    accent: "#36B37E",
     repos: [
       {
         repo: "ghostfolio/ghostfolio",
@@ -234,6 +312,10 @@ const openSourceData = [
     iconUrl: "https://github.com/different-ai.png?size=128",
     label: "different-ai/openwork",
     merged: 1,
+    name: "different.ai",
+    description: "Open-source AI dev tooling. Makers of opencode and openwork.",
+    siteUrl: "https://different.ai",
+    accent: "#7C3AED",
     repos: [
       {
         repo: "different-ai/openwork",
@@ -563,7 +645,7 @@ export default function Page() {
                         rel="noopener noreferrer"
                         className="text-zinc-900 dark:text-white font-medium hover:underline"
                       >
-                        <span className="font-bold tracking-tight" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>𝕏</span>
+                        <FaXTwitter className="inline-block w-[0.95em] h-[0.95em] -translate-y-[0.06em]" aria-label="X" />
                       </a>
                     </LinkPreview>
                     {" or "}
@@ -902,18 +984,28 @@ export default function Page() {
               return (
                 <details key={org.key} className={!isLast ? "border-b border-zinc-200 dark:border-zinc-700" : ""}>
                   <summary className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
-                    <span className="opensrc-chev font-mono text-zinc-400 text-sm">›</span>
+                    <ChevronRight className="opensrc-chev w-4 h-4 text-zinc-400 flex-shrink-0" />
                     <img
                       src={org.iconUrl}
                       alt=""
                       aria-hidden
-                      className="w-6 h-6 rounded ring-1 ring-zinc-200 dark:ring-zinc-700 flex-shrink-0"
+                      className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                       loading="lazy"
                     />
-                    <span className="font-mono text-sm flex-1 text-zinc-900 dark:text-white truncate">
-                      {org.label}
-                      {org.sub ? <span className="text-zinc-500"> · {org.sub}</span> : null}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <LinkPreview
+                        title={org.name}
+                        subtitle={org.description}
+                        href={org.siteUrl}
+                        avatar={org.iconUrl}
+                        accent={org.accent}
+                      >
+                        <span className="font-mono text-sm text-zinc-900 dark:text-white truncate">
+                          {org.label}
+                          {org.sub ? <span className="text-zinc-500"> · {org.sub}</span> : null}
+                        </span>
+                      </LinkPreview>
+                    </div>
                     <span className="font-mono text-xs tabular-nums text-zinc-500 flex-shrink-0">
                       {org.merged} merged
                     </span>
@@ -943,7 +1035,7 @@ export default function Page() {
                       org.repos.map((repo, ri) => (
                         <details key={repo.repo} className={ri === 0 ? "mt-2" : "mt-3"}>
                           <summary className="flex items-center gap-2 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 rounded">
-                            <span className="opensrc-chev font-mono text-zinc-400 text-xs">›</span>
+                            <ChevronRight className="opensrc-chev w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
                             <a
                               href={`https://github.com/${repo.repo}/pulls?q=is%3Apr+author%3Ayashranaway+is%3Amerged`}
                               target="_blank"
@@ -983,6 +1075,19 @@ export default function Page() {
               )
             })}
           </div>
+
+          <div className="flex justify-end">
+            <a
+              href="https://github.com/search?q=is%3Apr+author%3Ayashranaway+is%3Amerged&type=pullrequests"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-zinc-200 dark:border-zinc-700 font-mono text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+            >
+              <FaGithub className="w-3.5 h-3.5" />
+              <span>view all merged PRs</span>
+              <ArrowUpRight className="w-3 h-3 opacity-60 group-hover:opacity-100 group-hover:-translate-y-px group-hover:translate-x-px transition-all" />
+            </a>
+          </div>
         </section>
 
         {/* Projects Section */}
@@ -991,72 +1096,55 @@ export default function Page() {
             Projects
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 auto-rows-auto">
-            {[
-                {
-                  title: "NetPulse Monitor",
-                  description: "A distributed uptime monitoring system leveraging blockchain and decentralized validators for reliable, tamper-proof website monitoring. Uses cryptographically verified independent validators incentivized through micropayments, eliminating single-provider dependency.",
-                  size: "large"
-                },
-                {
-                  title: "Code-Sync Review MCP",
-                  description: "A Model Context Protocol (MCP) worker providing comprehensive TypeScript/JavaScript code analysis. Integrates with AI assistants and development tools for intelligent code review, static analysis, and automated patch generation.",
-                  size: "medium"
-                },
-                {
-                  title: "Automated Chapter Segmentation for Live News Streams",
-                  description: "Developed an AI-powered system to automatically segment YouTube live news streams into chapters by detecting topic shifts, context changes, and advertisement breaks in real-time. Implemented real-time transcription using Whisper-based models, combined with NLP for topic segmentation, enabling precise start and end timestamps for improved content navigation, highlight extraction, and personalized content delivery.",
-                  size: "large"
-                },
-                {
-                  title: "Discord Bot Management and Development",
-                  description: "Architected and deployed scalable Discord bots with advanced features including automated moderation, custom commands, database integration, and real-time analytics. Built using Discord.py with PostgreSQL backend, serving 10,000+ users across multiple servers.",
-                  size: "medium"
-                },
-                {
-                  title: "Automated Traffic Management System",
-                  description: "ATMS (Automated Traffic Management System) is an intelligent, AI-powered traffic control platform designed to optimize vehicle flow at busy intersections. Built with real-time computer vision and dynamic signal control logic.",
-                  size: "medium"
-                },
-                {
-                  title: "Virtual Mouse Gesture Control",
-                  description: "Hand gesture recognition system for controlling OS functions, including volume and media playback. Built using computer vision and machine learning to enable touchless interaction with system controls through real-time hand tracking and gesture classification.",
-                  size: "medium"
-                },
-                {
-                  title: "YODHA",
-                  description: "Developing an image recognition model to identify images in low-light conditions for improved clarity.",
-                  size: "small"
-                },
-                {
-                  title: "Stock Management Using LSTM",
-                  description: "Built an LSTM model to predict stock prices and manage stock levels based on historical data.",
-                  size: "small"
-                },
-                {
-                  title: "Sidemen Among Us Stats Website",
-                  description: "Web-based statistics tracker for Sidemen's 'Among Us' gameplay, providing comprehensive analytics and performance metrics for one of YouTube's most popular gaming series.",
-                  size: "small"
-                },
-              ].map((project, index) => (
-              <div 
+            {projectsData.map((project, index) => (
+              <div
                 key={project.title}
                 onMouseEnter={() => setHoveredProject(index)}
                 onMouseLeave={() => setHoveredProject(null)}
                 className={`relative p-4 sm:p-6 rounded-xl bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 transition-all duration-300 ${
-                  project.size === 'large' ? 'md:col-span-2 lg:col-span-2' : 
-                  project.size === 'medium' ? 'md:col-span-2 lg:col-span-1' : 
+                  project.size === 'large' ? 'md:col-span-2 lg:col-span-2' :
+                  project.size === 'medium' ? 'md:col-span-2 lg:col-span-1' :
                   ''
                 } ${
                   hoveredProject !== null && hoveredProject !== index ? 'blur-sm scale-[0.98] opacity-60' : 'shadow-lg'
                 }`}
               >
                 <div className="flex flex-col h-full gap-2 sm:gap-3">
-                  <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white transition-colors">
-                    {project.title}
-                  </h3>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white transition-colors">
+                      {project.title}
+                    </h3>
+                    {project.repo && (
+                      <a
+                        href={project.repo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-white transition-colors flex-shrink-0 mt-0.5"
+                        aria-label={`${project.title} GitHub repository`}
+                        data-no-letter
+                      >
+                        <FaGithub className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                      </a>
+                    )}
+                  </div>
                   <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed flex-1">
                     {project.description}
                   </p>
+                  {project.stack && project.stack.length > 0 && (
+                    <div className="flex items-center gap-1.5 sm:gap-2 pt-1 flex-wrap">
+                      {project.stack.map((t) => (
+                        <img
+                          key={t.name}
+                          src={t.iconUrl}
+                          alt={t.name}
+                          title={t.name}
+                          loading="lazy"
+                          className="w-5 h-5 sm:w-6 sm:h-6"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -1114,7 +1202,7 @@ export default function Page() {
                   className="text-zinc-900 dark:text-white relative inline-block group"
                   aria-label="Follow me on X"
                 >
-                  <span className="font-bold tracking-tight" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>𝕏</span>
+                  <FaXTwitter className="inline-block w-[0.95em] h-[0.95em] -translate-y-[0.06em]" aria-label="X" />
                   <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
                 </a>
               </LinkPreview>
@@ -1190,7 +1278,7 @@ export default function Page() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-2 sm:p-4" role="dialog" aria-modal="true">
           <div className="w-[min(98vw,1000px)] h-[min(95vh,900px)] max-h-[95vh] bg-white dark:bg-zinc-900 rounded-lg shadow-2xl border border-zinc-200 dark:border-zinc-700 flex flex-col overflow-hidden">
             <div className="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-zinc-200 dark:border-zinc-700">
-              <h3 className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white truncate flex-1 mr-2">Resume — Aditya Garud</h3>
+              <h3 className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white truncate flex-1 mr-2">Resume · Aditya Garud</h3>
               <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                 <a href="/AdityaGarudResume.pdf" download target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white text-xs sm:text-sm" data-no-letter>
                   <Download className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -1208,7 +1296,7 @@ export default function Page() {
         </div>
       )}
       {/* Bottom scroll progress bar */}
-      <div className="fixed bottom-0 left-0 right-0 h-1.5 bg-transparent z-50" aria-hidden="true">
+      <div className="fixed bottom-0 left-0 right-0 h-0.5 bg-transparent z-50" aria-hidden="true">
         <div
           className="h-full bg-zinc-900 dark:bg-white transition-[width] duration-150 ease-linear"
           style={{ width: `${scrollProgress}%` }}

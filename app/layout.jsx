@@ -3,6 +3,7 @@ import './globals.css'
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata = {
+  metadataBase: new URL('https://aditya-garud.me'),
   title: {
     default: 'Aditya Garud - Full Stack Developer & Machine Learning Engineer',
     template: '%s | Aditya Garud'
@@ -46,7 +47,7 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://adityagarud.com',
+    url: 'https://aditya-garud.me',
     siteName: 'Aditya Garud Portfolio',
     title: 'Aditya Garud - Full Stack Developer & Machine Learning Engineer',
     description: 'Full Stack Developer and Machine Learning Engineer specializing in AI, web development, and computer vision. Technical Lead at TekLingo.',
@@ -77,7 +78,7 @@ export const metadata = {
   },
   manifest: '/site.webmanifest',
   alternates: {
-    canonical: 'https://adityagarud.com',
+    canonical: 'https://aditya-garud.me',
   },
   category: 'technology',
 }
@@ -98,8 +99,8 @@ export default function RootLayout({ children }) {
     "@context": "https://schema.org",
     "@type": "Person",
     "name": "Aditya Garud",
-    "url": "https://adityagarud.com",
-    "image": "https://adityagarud.com/favicon.png",
+    "url": "https://aditya-garud.me",
+    "image": "https://aditya-garud.me/favicon.png",
     "jobTitle": "Full Stack Developer & Machine Learning Engineer",
     "worksFor": {
       "@type": "Organization",
