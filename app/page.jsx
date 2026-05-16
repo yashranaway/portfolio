@@ -136,7 +136,7 @@ const skillsData = {
 const openSourceData = [
   {
     key: "antiwork",
-    iconUrl: "https://github.com/gumroad.png?size=128",
+    iconUrl: "https://assets.gumroad.com/assets/pink-icon-c5f5013768a1da41246e70403f02afc8b34ac89c20f3ba2dd0a01f3973027700.png",
     label: "antiwork",
     sub: "Gumroad · 2 repos",
     merged: 19,
