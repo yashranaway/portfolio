@@ -15,6 +15,7 @@ import ClickSpark from "@/components/ClickSpark"
 import TimeCounter from "@/components/TimeCounter"
 import CodeHover from "@/components/CodeHover"
 import LinkPreview from "@/components/LinkPreview"
+import VisitorBadge from "@/components/VisitorBadge"
 import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect"
 import { RandomMatrix } from "@/components/ui/matrix"
 import { getCalApi } from "@calcom/embed-react"
@@ -1387,6 +1388,10 @@ export default function Page() {
                 <span>Resume</span>
                 <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
               </button>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <VisitorBadge />
             </div>
           </div>
         </section>
