@@ -1388,10 +1388,10 @@ export default function Page() {
                 <span>Resume</span>
                 <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
               </button>
-            </div>
 
-            <div className="flex justify-end pt-2">
-              <VisitorBadge />
+              <div className="ml-auto">
+                <VisitorBadge />
+              </div>
             </div>
           </div>
         </section>
