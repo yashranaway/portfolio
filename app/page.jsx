@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
 import { Sun, Moon, Heart, Download, X, GitMerge, ChevronRight, ArrowUpRight } from "lucide-react"
 import { FaXTwitter, FaGithub } from "react-icons/fa6"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
+import { createPortal } from "react-dom"
 
 
 import ClickSpark from "@/components/ClickSpark"
@@ -23,6 +24,7 @@ const ActivityCalendar = dynamic(
   () => import("react-activity-calendar").then((mod) => mod.ActivityCalendar),
   { ssr: false }
 )
+const ContribAreaChart = dynamic(() => import("@/components/ContribAreaChart"), { ssr: false })
 import githubAvatar from "@/assets/githubphotu.jpg"
 import linkedinAvatar from "@/assets/linkedinphotu.jpg"
 import batcatAvatar from "@/assets/batcat.jpg"
@@ -339,6 +341,102 @@ export default function Page() {
   const [totalContributions, setTotalContributions] = useState(0)
   const [contributionsLoading, setContributionsLoading] = useState(true)
 
+  // Year-to-date sparkline (weekly buckets from Jan 1 → today),
+  // split by GitHub contribution-intensity level (1–4) for stacked chart.
+  const sparkline = useMemo(() => {
+    if (!contributions || contributions.length === 0) return null
+    const DAY = 24 * 60 * 60 * 1000
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const year = todayStart.getFullYear()
+    const yearStartMs = new Date(year, 0, 1).getTime()
+    const daysIntoYear = Math.floor((todayStart.getTime() - yearStartMs) / DAY)
+    const WEEKS = Math.max(1, Math.ceil((daysIntoYear + 1) / 7))
+    const buckets = Array.from({ length: WEEKS }, () => ({ l1: 0, l2: 0, l3: 0, l4: 0, total: 0 }))
+    let total = 0
+    for (const c of contributions) {
+      const t = new Date(c.date).getTime()
+      if (t < yearStartMs || t > todayStart.getTime()) continue
+      const daysSinceYearStart = Math.floor((t - yearStartMs) / DAY)
+      const weekIdx = Math.min(WEEKS - 1, Math.floor(daysSinceYearStart / 7))
+      const b = buckets[weekIdx]
+      b.total += c.count
+      if (c.level === 1) b.l1 += c.count
+      else if (c.level === 2) b.l2 += c.count
+      else if (c.level === 3) b.l3 += c.count
+      else if (c.level === 4) b.l4 += c.count
+      total += c.count
+    }
+    // sparkline path uses week totals
+    const totals = buckets.map((b) => b.total)
+    const max = Math.max(...totals, 1)
+    const W = 240, H = 28, PAD = 2
+    const step = WEEKS > 1 ? W / (WEEKS - 1) : 0
+    const pts = totals.map((v, i) => {
+      const x = i * step
+      const y = H - (v / max) * (H - PAD * 2) - PAD
+      return [x, y]
+    })
+    const line = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
+    const area = `${line} L${W},${H} L0,${H} Z`
+    const chartData = buckets.map((b, i) => {
+      const d = new Date(yearStartMs + i * 7 * DAY)
+      return {
+        week: d.toLocaleString('en', { month: 'short', day: 'numeric' }),
+        l1: b.l1,
+        l2: b.l2,
+        l3: b.l3,
+        l4: b.l4,
+        total: b.total,
+      }
+    })
+    return { line, area, total, year, chartData }
+  }, [contributions])
+
+  // Hover state + position for the expanded recharts popup
+  const sparkRef = useRef(null)
+  const [sparkTriggerHover, setSparkTriggerHover] = useState(false)
+  const [sparkPopupHover, setSparkPopupHover] = useState(false)
+  const sparkTriggerTimer = useRef(null)
+  const sparkPopupTimer = useRef(null)
+  const sparkOpen = sparkTriggerHover || sparkPopupHover
+  const [sparkPos, setSparkPos] = useState({ top: 0, left: 0 })
+
+  useEffect(() => {
+    if (!sparkOpen) return
+    const compute = () => {
+      const el = sparkRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const w = Math.min(520, Math.floor(vw * 0.92))
+      const h = 280
+      const cx = rect.left + rect.width / 2
+      const left = Math.min(Math.max(cx - w / 2, 8), vw - 8 - w)
+      let top = rect.bottom + 12
+      if (top + h > vh - 8) top = Math.max(8, rect.top - 12 - h)
+      setSparkPos({ top, left, w, h })
+    }
+    compute()
+    window.addEventListener('scroll', compute, { passive: true })
+    window.addEventListener('resize', compute)
+    return () => {
+      window.removeEventListener('scroll', compute)
+      window.removeEventListener('resize', compute)
+    }
+  }, [sparkOpen])
+
+  const sparkEnterTrigger = () => { clearTimeout(sparkTriggerTimer.current); setSparkTriggerHover(true) }
+  const sparkLeaveTrigger = () => { clearTimeout(sparkTriggerTimer.current); sparkTriggerTimer.current = setTimeout(() => setSparkTriggerHover(false), 120) }
+  const sparkEnterPopup = () => { clearTimeout(sparkPopupTimer.current); setSparkPopupHover(true) }
+  const sparkLeavePopup = () => { clearTimeout(sparkPopupTimer.current); sparkPopupTimer.current = setTimeout(() => setSparkPopupHover(false), 120) }
+
+  useEffect(() => () => {
+    clearTimeout(sparkTriggerTimer.current)
+    clearTimeout(sparkPopupTimer.current)
+  }, [])
+
   // Fetch GitHub contributions from public API
   useEffect(() => {
     async function fetchContributions() {
@@ -592,6 +690,47 @@ export default function Page() {
                 <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 -mt-2">
                   been here for <TimeCounter startDate={new Date("2005-01-03")} /> years
                 </p>
+
+                {sparkline && (
+                  <div
+                    ref={sparkRef}
+                    onMouseEnter={sparkEnterTrigger}
+                    onMouseLeave={sparkLeaveTrigger}
+                    className="inline-flex items-center gap-3 text-zinc-500 dark:text-zinc-400 cursor-default"
+                    aria-label={`${sparkline.total} contributions this year`}
+                    data-no-letter
+                  >
+                    <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em]">this year</span>
+                    <svg viewBox="0 0 240 28" preserveAspectRatio="none" className="w-28 sm:w-32 h-4 sm:h-5 text-zinc-700 dark:text-zinc-300 group-hover:text-[#a371f7] transition-colors" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="spark-grad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="currentColor" stopOpacity="0.35" />
+                          <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path d={sparkline.area} fill="url(#spark-grad)" />
+                      <path d={sparkline.line} stroke="currentColor" strokeWidth="1.25" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span className="font-mono text-xs">
+                      <span className="text-zinc-900 dark:text-white tabular-nums">{sparkline.total}</span> contributions
+                    </span>
+                  </div>
+                )}
+
+                {sparkline && sparkOpen && mounted && createPortal(
+                  <div
+                    className="fixed z-50"
+                    style={{ top: sparkPos.top, left: sparkPos.left, width: sparkPos.w, height: sparkPos.h }}
+                    onMouseEnter={sparkEnterPopup}
+                    onMouseLeave={sparkLeavePopup}
+                    data-no-letter
+                  >
+                    <div className="w-full h-full rounded-xl border border-zinc-700 bg-zinc-900/95 shadow-2xl backdrop-blur p-4 animate-fade-in-up">
+                      <ContribAreaChart data={sparkline.chartData} total={sparkline.total} year={sparkline.year} />
+                    </div>
+                  </div>,
+                  document.body
+                )}
           
                 <div className="space-y-2 sm:space-y-3">
                   <h2 className="text-base sm:text-lg md:text-xl font-medium text-zinc-900 dark:text-white">about;</h2>
