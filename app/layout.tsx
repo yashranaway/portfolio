@@ -107,13 +107,32 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
-  const jsonLd = {
+  const personJsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
+    "@id": "https://aditya-garud.me/#person",
     name: "Aditya Garud",
+    givenName: "Aditya",
+    familyName: "Garud",
     url: "https://aditya-garud.me",
-    image: "https://aditya-garud.me/favicon.png",
+    image: "https://github.com/yashranaway.png",
+    email: "mailto:garudaditya079@gmail.com",
     jobTitle: "Full Stack Developer & Machine Learning Engineer",
+    hasOccupation: {
+      "@type": "Occupation",
+      name: "Full Stack Developer & Machine Learning Engineer",
+      occupationLocation: { "@type": "City", name: "Pune" },
+      skills: [
+        "Machine Learning",
+        "Artificial Intelligence",
+        "Computer Vision",
+        "Web Development",
+        "React",
+        "Next.js",
+        "Python",
+        "TypeScript",
+      ],
+    },
     worksFor: {
       "@type": "Organization",
       name: "TekLingo",
@@ -121,6 +140,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     alumniOf: {
       "@type": "EducationalOrganization",
       name: "Vishwakarma University",
+      url: "https://www.vupune.ac.in/",
     },
     address: {
       "@type": "PostalAddress",
@@ -128,9 +148,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
       addressRegion: "Maharashtra",
       addressCountry: "IN",
     },
+    nationality: { "@type": "Country", name: "India" },
+    knowsLanguage: ["English", "Hindi", "Marathi"],
     sameAs: [
       "https://github.com/yashranaway",
       "https://www.linkedin.com/in/aditya-garud-8b633a303",
+      "https://x.com/yashranaway",
     ],
     knowsAbout: [
       "Machine Learning",
@@ -138,6 +161,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       "Web Development",
       "Python",
       "JavaScript",
+      "TypeScript",
       "React",
       "Next.js",
       "TensorFlow",
@@ -156,7 +180,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
       </head>
       <body className={GeistSans.className}>
