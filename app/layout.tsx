@@ -89,6 +89,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://aditya-garud.me",
   },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  applicationName: "Aditya Garud Portfolio",
+  referrer: "origin-when-cross-origin",
   category: "technology",
 }
 
