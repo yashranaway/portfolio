@@ -1,5 +1,7 @@
 "use client"
 
+import type { ReactNode } from "react"
+
 export function SkillCardSkeleton() {
   return (
     <div className="group relative flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 dark:bg-white/10 backdrop-blur-sm border border-white/10 dark:border-white/20 animate-pulse">
@@ -26,7 +28,11 @@ export function ProjectCardSkeleton() {
   )
 }
 
-export function SectionSkeleton({ children }) {
+interface SectionSkeletonProps {
+  children?: ReactNode
+}
+
+export function SectionSkeleton({ children }: SectionSkeletonProps) {
   return (
     <section className="space-y-8 animate-fade-in">
       {children}
