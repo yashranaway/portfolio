@@ -95,8 +95,8 @@ web_modules/
 .next
 out
 
-# Generated at build time by scripts/fetch-contributions.mjs
-lib/contributions.json
+# Vercel
+.vercel
 
 # Nuxt.js build / generate output
 .nuxt
