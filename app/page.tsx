@@ -14,6 +14,7 @@ import LinkPreview from "@/components/LinkPreview"
 import VisitorBadge from "@/components/VisitorBadge"
 import { RandomMatrix } from "@/components/ui/matrix"
 import { projects as projectsData } from "@/lib/projects"
+import contributionsJson from "@/lib/contributions.json"
 import { getCalApi } from "@calcom/embed-react"
 import dynamic from "next/dynamic"
 import type { ContribChartDatum } from "@/components/ContribAreaChart"
@@ -281,23 +282,15 @@ const openSourceData: OpenSourceOrg[] = [
   },
 ]
 
-const LEVEL_MAP: Record<string, 0 | 1 | 2 | 3 | 4> = {
-  NONE: 0,
-  FIRST_QUARTILE: 1,
-  SECOND_QUARTILE: 2,
-  THIRD_QUARTILE: 3,
-  FOURTH_QUARTILE: 4,
-}
-
 export default function Page() {
   const { theme } = useTheme()
   const [scrollProgress, setScrollProgress] = useState<number>(0)
   const [showResume, setShowResume] = useState<boolean>(false)
   const [mounted, setMounted] = useState<boolean>(false)
   const [hoveredProject, setHoveredProject] = useState<number | null>(null)
-  const [contributions, setContributions] = useState<Contribution[]>([])
-  const [totalContributions, setTotalContributions] = useState<number>(0)
-  const [contributionsLoading, setContributionsLoading] = useState<boolean>(true)
+  // Contributions are fetched at build time by scripts/fetch-contributions.mjs.
+  // With GH_CONTRIBUTIONS_TOKEN set in CI the count includes private repos.
+  const contributions = contributionsJson.contributions as Contribution[]
 
   // Year-to-date sparkline (weekly buckets from Jan 1 → today),
   // split by GitHub contribution-intensity level (1–4) for stacked chart.
@@ -409,48 +402,6 @@ export default function Page() {
     },
     []
   )
-
-  // Fetch GitHub contributions from public API
-  useEffect(() => {
-    async function fetchContributions() {
-      try {
-        setContributionsLoading(true)
-        const res = await fetch("https://github-contributions-api.deno.dev/yashranaway.json")
-        const data: {
-          contributions?: Array<
-            Array<{ date?: string; contributionCount?: number; contributionLevel?: string }>
-          >
-        } = await res.json()
-
-        if (data?.contributions && Array.isArray(data.contributions)) {
-          const mapped: Contribution[] = data.contributions
-            .flat()
-            .filter(
-              (item): item is { date: string; contributionCount: number; contributionLevel: string } =>
-                !!item && !!item.date && "contributionCount" in item && "contributionLevel" in item
-            )
-            .map((item) => ({
-              date: item.date,
-              count: Number(item.contributionCount || 0),
-              level: (LEVEL_MAP[item.contributionLevel] ?? 0) as 0 | 1 | 2 | 3 | 4,
-            }))
-
-          // Filter to last year
-          const oneYearAgo = new Date()
-          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
-          const filtered = mapped.filter((item) => new Date(item.date) >= oneYearAgo)
-
-          setTotalContributions(mapped.reduce((sum, item) => sum + item.count, 0))
-          setContributions(filtered)
-        }
-      } catch (e) {
-        // silently fail
-      } finally {
-        setContributionsLoading(false)
-      }
-    }
-    fetchContributions()
-  }, [])
 
   // Prevent hydration mismatch by only rendering theme-dependent content after mount
   useEffect(() => {
@@ -758,11 +709,7 @@ export default function Page() {
 
         {/* GitHub Activity */}
         <section className="space-y-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-          {contributionsLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
-            </div>
-          ) : contributions.length > 0 ? (
+          {contributions.length > 0 ? (
             <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-4 sm:p-6 w-fit mx-auto max-w-full overflow-x-auto">
               <ActivityCalendar
                 data={contributions}
