@@ -71,7 +71,8 @@ export const metadata: Metadata = {
     title: "Aditya Garud - Full Stack Developer & Machine Learning Engineer",
     description:
       "Full Stack Developer and Machine Learning Engineer specializing in AI, web development, and computer vision.",
-    creator: "@adityagarud",
+    creator: "@yashranaway",
+    site: "@yashranaway",
     images: ["/og-image.png"],
   },
   icons: {
