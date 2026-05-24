@@ -96,8 +96,8 @@ export function generateViewport(): Viewport {
     width: "device-width",
     initialScale: 1,
     themeColor: [
-      { media: "(prefers-color-scheme: light)", color: "#6366F1" },
-      { media: "(prefers-color-scheme: dark)", color: "#1E293B" },
+      { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+      { media: "(prefers-color-scheme: dark)", color: "#000000" },
     ],
   }
 }
