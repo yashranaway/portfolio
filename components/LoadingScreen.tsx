@@ -1,14 +1,18 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react"
 
-export default function LoadingScreen({ onComplete }) {
-  const [progress, setProgress] = useState(0)
-  const [isVisible, setIsVisible] = useState(true)
+interface LoadingScreenProps {
+  onComplete?: () => void
+}
+
+export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
+  const [progress, setProgress] = useState<number>(0)
+  const [isVisible, setIsVisible] = useState<boolean>(true)
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setProgress(prev => {
+      setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer)
           setTimeout(() => {
@@ -42,7 +46,7 @@ export default function LoadingScreen({ onComplete }) {
         {/* Progress Bar */}
         <div className="w-64 mx-auto">
           <div className="h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progress}%` }}
             />
