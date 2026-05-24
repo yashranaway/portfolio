@@ -2,10 +2,16 @@
 
 import { useEffect, useState } from "react"
 
+interface Place {
+  city: string | null
+  country: string | null
+  tz: string | null
+}
+
 export default function VisitorBadge() {
-  const [count, setCount] = useState(null)
-  const [place, setPlace] = useState({ city: null, country: null, tz: null })
-  const [time, setTime] = useState("")
+  const [count, setCount] = useState<number | null>(null)
+  const [place, setPlace] = useState<Place>({ city: null, country: null, tz: null })
+  const [time, setTime] = useState<string>("")
 
   // Visit counter — increments once per browser session to avoid refresh inflation
   useEffect(() => {
@@ -14,7 +20,7 @@ export default function VisitorBadge() {
     const path = counted ? "get" : "hit"
     fetch(`https://abacus.jasoncameron.dev/${path}/aditya-garud-me/visits`)
       .then((r) => r.json())
-      .then((d) => {
+      .then((d: { value?: number }) => {
         if (cancelled) return
         if (typeof d?.value === "number") setCount(d.value)
         if (!counted && typeof window !== "undefined") sessionStorage.setItem("vc-counted", "1")
@@ -28,7 +34,7 @@ export default function VisitorBadge() {
     let cancelled = false
     fetch("https://ipapi.co/json/")
       .then((r) => r.json())
-      .then((d) => {
+      .then((d: { city?: string; country_name?: string; timezone?: string }) => {
         if (cancelled) return
         setPlace({
           city: d?.city || null,
@@ -46,7 +52,7 @@ export default function VisitorBadge() {
     const update = () => {
       try {
         const fmt = new Intl.DateTimeFormat("en-US", {
-          timeZone: place.tz,
+          timeZone: place.tz!,
           hour: "numeric",
           minute: "2-digit",
         })
