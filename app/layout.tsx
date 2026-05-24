@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import type { ReactNode } from "react"
+import { GeistSans } from "geist/font/sans"
+import { GeistMono } from "geist/font/mono"
 import { ThemeProvider } from "./theme-provider"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
@@ -145,14 +147,18 @@ export default function RootLayout({ children }: RootLayoutProps) {
   }
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+    >
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body>
+      <body className={GeistSans.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>
