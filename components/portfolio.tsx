@@ -14,7 +14,7 @@ import LinkPreview from "@/components/LinkPreview"
 import VisitorBadge from "@/components/VisitorBadge"
 import { RandomMatrix } from "@/components/ui/matrix"
 import { projects as projectsData } from "@/lib/projects"
-import contributionsJson from "@/lib/contributions.json"
+import type { Contribution } from "@/lib/github"
 import { getCalApi } from "@calcom/embed-react"
 import dynamic from "next/dynamic"
 import type { ContribChartDatum } from "@/components/ContribAreaChart"
@@ -68,12 +68,6 @@ interface OpenSourceOrg {
   siteUrl: string
   accent: string
   repos: OpenSourceRepo[]
-}
-
-interface Contribution {
-  date: string
-  count: number
-  level: 0 | 1 | 2 | 3 | 4
 }
 
 interface SparklineData {
@@ -282,15 +276,16 @@ const openSourceData: OpenSourceOrg[] = [
   },
 ]
 
-export default function Page() {
+interface PortfolioProps {
+  contributions: Contribution[]
+}
+
+export function Portfolio({ contributions }: PortfolioProps) {
   const { theme } = useTheme()
   const [scrollProgress, setScrollProgress] = useState<number>(0)
   const [showResume, setShowResume] = useState<boolean>(false)
   const [mounted, setMounted] = useState<boolean>(false)
   const [hoveredProject, setHoveredProject] = useState<number | null>(null)
-  // Contributions are fetched at build time by scripts/fetch-contributions.mjs.
-  // With GH_CONTRIBUTIONS_TOKEN set in CI the count includes private repos.
-  const contributions = contributionsJson.contributions as Contribution[]
 
   // Year-to-date sparkline (weekly buckets from Jan 1 → today),
   // split by GitHub contribution-intensity level (1–4) for stacked chart.
