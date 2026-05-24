@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import { ThemeProvider } from "./theme-provider"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
+import { projects } from "@/lib/projects"
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://aditya-garud.me"),
@@ -195,6 +196,26 @@ export default function RootLayout({ children }: RootLayoutProps) {
     mainEntity: { "@id": "https://aditya-garud.me/#person" },
   }
 
+  const projectsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Projects by Aditya Garud",
+    itemListOrder: "https://schema.org/ItemListOrderDescending",
+    numberOfItems: projects.length,
+    itemListElement: projects.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "SoftwareSourceCode",
+        name: p.title,
+        description: p.description,
+        ...(p.repo ? { codeRepository: p.repo, url: p.repo } : {}),
+        programmingLanguage: p.stack.map((t) => t.name),
+        author: { "@id": "https://aditya-garud.me/#person" },
+      },
+    })),
+  }
+
   return (
     <html
       lang="en"
@@ -213,6 +234,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(profilePageJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(projectsJsonLd) }}
         />
       </head>
       <body className={GeistSans.className}>
