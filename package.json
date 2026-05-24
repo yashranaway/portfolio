@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/fetch-contributions.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/fetch-contributions.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "fetch:contributions": "node scripts/fetch-contributions.mjs"
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
