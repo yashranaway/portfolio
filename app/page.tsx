@@ -763,7 +763,7 @@ export default function Page() {
                   </div>
                 )}
 
-                {sparkline && sparkOpen && mounted && createPortal(
+                {sparkline && sparkOpen && mounted && sparkPos.w && sparkPos.h && createPortal(
                   <div
                     className="fixed z-50"
                     style={{ top: sparkPos.top, left: sparkPos.left, width: sparkPos.w, height: sparkPos.h }}
