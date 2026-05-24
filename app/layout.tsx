@@ -171,6 +171,30 @@ export default function RootLayout({ children }: RootLayoutProps) {
     ],
   }
 
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://aditya-garud.me/#website",
+    url: "https://aditya-garud.me",
+    name: "Aditya Garud",
+    description:
+      "Portfolio of Aditya Garud — Full Stack Developer and Machine Learning Engineer in Pune.",
+    inLanguage: "en",
+    publisher: { "@id": "https://aditya-garud.me/#person" },
+  }
+
+  const profilePageJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "@id": "https://aditya-garud.me/#profile",
+    url: "https://aditya-garud.me",
+    name: "Aditya Garud — Full Stack Developer & Machine Learning Engineer",
+    inLanguage: "en",
+    isPartOf: { "@id": "https://aditya-garud.me/#website" },
+    about: { "@id": "https://aditya-garud.me/#person" },
+    mainEntity: { "@id": "https://aditya-garud.me/#person" },
+  }
+
   return (
     <html
       lang="en"
@@ -181,6 +205,14 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(profilePageJsonLd) }}
         />
       </head>
       <body className={GeistSans.className}>
