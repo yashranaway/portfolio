@@ -1,12 +1,12 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
-import { Sun, Moon, Heart, Download, X, GitMerge, ChevronRight, ArrowUpRight } from "lucide-react"
+import { Heart, Download, X, GitMerge, ChevronRight, ArrowUpRight } from "lucide-react"
 import { FaXTwitter, FaGithub } from "react-icons/fa6"
 import { useState, useEffect, useMemo, useRef } from "react"
 import { createPortal } from "react-dom"
 
+import { ModeToggle } from "@/components/mode-toggle"
 import ClickSpark from "@/components/ClickSpark"
 import TimeCounter from "@/components/TimeCounter"
 import CodeHover from "@/components/CodeHover"
@@ -413,15 +413,11 @@ const LEVEL_MAP: Record<string, 0 | 1 | 2 | 3 | 4> = {
 }
 
 export default function Page() {
-  const { theme, setTheme } = useTheme()
+  const { theme } = useTheme()
   const [scrollProgress, setScrollProgress] = useState<number>(0)
   const [showResume, setShowResume] = useState<boolean>(false)
   const [mounted, setMounted] = useState<boolean>(false)
-  // Gate theme-dependent rendering until after hydration to avoid SSR/client mismatch:
-  // useTheme() returns undefined on the server and on the first client render.
-  const isDark = mounted && theme === "dark"
   const [hoveredProject, setHoveredProject] = useState<number | null>(null)
-  const [isTransitioning, setIsTransitioning] = useState<boolean>(false)
   const [contributions, setContributions] = useState<Contribution[]>([])
   const [totalContributions, setTotalContributions] = useState<number>(0)
   const [contributionsLoading, setContributionsLoading] = useState<boolean>(true)
@@ -597,18 +593,6 @@ export default function Page() {
     })()
   }, [])
 
-  // Handle theme switch with smooth lazy animation
-  const handleThemeToggle = () => {
-    setIsTransitioning(true)
-    // Add a small delay for the lazy animation effect
-    setTimeout(() => {
-      setTheme(theme === "dark" ? "light" : "dark")
-      setTimeout(() => {
-        setIsTransitioning(false)
-      }, 300)
-    }, 100)
-  }
-
   // Global click handler for letter animations
   const triggerRandomLetterEffect = () => {
     const letters = document.querySelectorAll<HTMLElement>(".letter")
@@ -711,52 +695,10 @@ export default function Page() {
       easing="ease-out"
       extraScale={1.0}
     >
-      <div className={`min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-white relative transition-colors duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-        isTransitioning ? "transition-all" : ""
-      }`}>
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-white relative transition-colors duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]">
       {/* Header */}
       <header className="container mx-auto px-4 py-4 sm:py-6 flex justify-center items-center animate-fade-in relative z-50">
-        <Button
-          variant="ghost"
-          size="icon"
-          data-no-letter
-          onClick={handleThemeToggle}
-          disabled={isTransitioning}
-          className={`relative rounded-full w-10 h-10 sm:w-12 sm:h-12 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-zinc-100 dark:hover:bg-zinc-800 ${
-            isTransitioning ? "opacity-70 cursor-wait" : ""
-          }`}
-          aria-label={mounted ? `Switch to ${theme === "dark" ? "light" : "dark"} mode` : "Toggle theme"}
-        >
-          {/* Sun Icon - shows in dark mode to switch to light */}
-          <Sun
-            className={`absolute h-5 w-5 sm:h-6 sm:w-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-              isDark
-                ? "rotate-0 scale-100 opacity-100"
-                : "rotate-[360deg] scale-0 opacity-0"
-            }`}
-            style={{
-              filter: isDark ? "drop-shadow(0 0 4px rgba(251, 191, 36, 0.5))" : "none",
-              transitionProperty: "all, filter",
-              transitionDuration: "700ms, 700ms",
-              transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1), ease-in-out",
-            }}
-          />
-          {/* Moon Icon - shows in light mode to switch to dark */}
-          <Moon
-            className={`absolute h-5 w-5 sm:h-6 sm:w-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-              isDark
-                ? "rotate-[-360deg] scale-0 opacity-0"
-                : "rotate-0 scale-100 opacity-100"
-            }`}
-            style={{
-              filter: isDark ? "none" : "drop-shadow(0 0 4px rgba(147, 197, 253, 0.5))",
-              transitionProperty: "all, filter",
-              transitionDuration: "700ms, 700ms",
-              transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1), ease-in-out",
-            }}
-          />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+        <ModeToggle />
       </header>
 
       {/* Main Content */}
