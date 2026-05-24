@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://adityagarud.com/sitemap.xml
+Sitemap: https://aditya-garud.me/sitemap.xml
