@@ -1,25 +1,21 @@
 "use client"
 
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
-
-import { Card, CardContent } from "@/components/ui/card"
 import { useTheme } from "next-themes"
 import { Sun, Moon, Heart, Download, X, GitMerge, ChevronRight, ArrowUpRight } from "lucide-react"
 import { FaXTwitter, FaGithub } from "react-icons/fa6"
 import { useState, useEffect, useMemo, useRef } from "react"
 import { createPortal } from "react-dom"
 
-
 import ClickSpark from "@/components/ClickSpark"
 import TimeCounter from "@/components/TimeCounter"
 import CodeHover from "@/components/CodeHover"
 import LinkPreview from "@/components/LinkPreview"
 import VisitorBadge from "@/components/VisitorBadge"
-import { BackgroundRippleEffect } from "@/components/ui/background-ripple-effect"
 import { RandomMatrix } from "@/components/ui/matrix"
 import { getCalApi } from "@calcom/embed-react"
 import dynamic from "next/dynamic"
+import type { ContribChartDatum } from "@/components/ContribAreaChart"
 
 const ActivityCalendar = dynamic(
   () => import("react-activity-calendar").then((mod) => mod.ActivityCalendar),
@@ -30,9 +26,86 @@ import githubAvatar from "@/assets/githubphotu.jpg"
 import linkedinAvatar from "@/assets/linkedinphotu.jpg"
 import batcatAvatar from "@/assets/batcat.jpg"
 
+// ---------- Types ----------
+interface Skill {
+  name: string
+  iconUrl: string
+  iconSrc?: string
+  color: string
+}
+
+interface SkillsData {
+  languages: Skill[]
+  frontend: Skill[]
+  backend: Skill[]
+  tools: Skill[]
+  ai: Skill[]
+  hardware: Skill[]
+  other: Skill[]
+}
+
+interface TechItem {
+  name: string
+  iconUrl: string
+}
+
+type ProjectSize = "large" | "medium" | "small"
+
+interface Project {
+  title: string
+  description: string
+  size: ProjectSize
+  repo?: string
+  stack: TechItem[]
+}
+
+interface OpenSourcePR {
+  num: number
+  title: string
+}
+
+interface OpenSourceRepo {
+  repo: string
+  merged: number
+  prs: OpenSourcePR[]
+}
+
+interface OpenSourceOrg {
+  key: string
+  iconUrl: string
+  label: string
+  sub?: string
+  merged: number
+  name: string
+  description: string
+  siteUrl: string
+  accent: string
+  repos: OpenSourceRepo[]
+}
+
+interface Contribution {
+  date: string
+  count: number
+  level: 0 | 1 | 2 | 3 | 4
+}
+
+interface SparklineData {
+  line: string
+  area: string
+  total: number
+  year: number
+  chartData: ContribChartDatum[]
+}
+
+interface SparkPos {
+  top: number
+  left: number
+  w?: number
+  h?: number
+}
 
 // Organized skills data
-const skillsData = {
+const skillsData: SkillsData = {
   languages: [
     { name: "C", iconUrl: "https://skillicons.dev/icons?i=c", color: "#A8B9CC" },
     { name: "C++", iconUrl: "https://skillicons.dev/icons?i=cpp", color: "#00599C" },
@@ -85,7 +158,7 @@ const skillsData = {
     { name: "Discord Bot Dev", iconUrl: "https://skillicons.dev/icons?i=discord", color: "#5865F2" },
     { name: "Discord.js", iconUrl: "https://skillicons.dev/icons?i=discordjs", color: "#5865F2" },
     { name: "Discord.py", iconUrl: "/icons/discordpy.png", color: "#3776AB" },
-  ]
+  ],
 }
 
 // Project tech stack icons (uses skillicons.dev, same as the Skills section)
@@ -103,9 +176,9 @@ const tech = {
   opencv:    { name: "OpenCV", iconUrl: "https://skillicons.dev/icons?i=opencv" },
   tensorflow:{ name: "TensorFlow", iconUrl: "https://skillicons.dev/icons?i=tensorflow" },
   arduino:   { name: "Arduino / Embedded", iconUrl: "https://skillicons.dev/icons?i=arduino" },
-}
+} satisfies Record<string, TechItem>
 
-const projectsData = [
+const projectsData: Project[] = [
   {
     title: "NetPulse Monitor",
     description: "Decentralized uptime monitor. Independent validators verify checks and are paid via micropayments.",
@@ -198,7 +271,7 @@ const projectsData = [
 ]
 
 // Open Source contributions (curated, merged-only)
-const openSourceData = [
+const openSourceData: OpenSourceOrg[] = [
   {
     key: "antiwork",
     iconUrl: "https://assets.gumroad.com/assets/pink-icon-c5f5013768a1da41246e70403f02afc8b34ac89c20f3ba2dd0a01f3973027700.png",
@@ -331,20 +404,31 @@ const openSourceData = [
   },
 ]
 
+const LEVEL_MAP: Record<string, 0 | 1 | 2 | 3 | 4> = {
+  NONE: 0,
+  FIRST_QUARTILE: 1,
+  SECOND_QUARTILE: 2,
+  THIRD_QUARTILE: 3,
+  FOURTH_QUARTILE: 4,
+}
+
 export default function Page() {
   const { theme, setTheme } = useTheme()
-  const [scrollProgress, setScrollProgress] = useState(0)
-  const [showResume, setShowResume] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const [hoveredProject, setHoveredProject] = useState(null)
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const [contributions, setContributions] = useState([])
-  const [totalContributions, setTotalContributions] = useState(0)
-  const [contributionsLoading, setContributionsLoading] = useState(true)
+  const [scrollProgress, setScrollProgress] = useState<number>(0)
+  const [showResume, setShowResume] = useState<boolean>(false)
+  const [mounted, setMounted] = useState<boolean>(false)
+  // Gate theme-dependent rendering until after hydration to avoid SSR/client mismatch:
+  // useTheme() returns undefined on the server and on the first client render.
+  const isDark = mounted && theme === "dark"
+  const [hoveredProject, setHoveredProject] = useState<number | null>(null)
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false)
+  const [contributions, setContributions] = useState<Contribution[]>([])
+  const [totalContributions, setTotalContributions] = useState<number>(0)
+  const [contributionsLoading, setContributionsLoading] = useState<boolean>(true)
 
   // Year-to-date sparkline (weekly buckets from Jan 1 → today),
   // split by GitHub contribution-intensity level (1–4) for stacked chart.
-  const sparkline = useMemo(() => {
+  const sparkline = useMemo<SparklineData | null>(() => {
     if (!contributions || contributions.length === 0) return null
     const DAY = 24 * 60 * 60 * 1000
     const todayStart = new Date()
@@ -373,17 +457,17 @@ export default function Page() {
     const max = Math.max(...totals, 1)
     const W = 240, H = 28, PAD = 2
     const step = WEEKS > 1 ? W / (WEEKS - 1) : 0
-    const pts = totals.map((v, i) => {
+    const pts: Array<[number, number]> = totals.map((v, i) => {
       const x = i * step
       const y = H - (v / max) * (H - PAD * 2) - PAD
       return [x, y]
     })
-    const line = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
+    const line = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ")
     const area = `${line} L${W},${H} L0,${H} Z`
-    const chartData = buckets.map((b, i) => {
+    const chartData: ContribChartDatum[] = buckets.map((b, i) => {
       const d = new Date(yearStartMs + i * 7 * DAY)
       return {
-        week: d.toLocaleString('en', { month: 'short', day: 'numeric' }),
+        week: d.toLocaleString("en", { month: "short", day: "numeric" }),
         l1: b.l1,
         l2: b.l2,
         l3: b.l3,
@@ -395,13 +479,13 @@ export default function Page() {
   }, [contributions])
 
   // Hover state + position for the expanded recharts popup
-  const sparkRef = useRef(null)
-  const [sparkTriggerHover, setSparkTriggerHover] = useState(false)
-  const [sparkPopupHover, setSparkPopupHover] = useState(false)
-  const sparkTriggerTimer = useRef(null)
-  const sparkPopupTimer = useRef(null)
+  const sparkRef = useRef<HTMLDivElement | null>(null)
+  const [sparkTriggerHover, setSparkTriggerHover] = useState<boolean>(false)
+  const [sparkPopupHover, setSparkPopupHover] = useState<boolean>(false)
+  const sparkTriggerTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const sparkPopupTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const sparkOpen = sparkTriggerHover || sparkPopupHover
-  const [sparkPos, setSparkPos] = useState({ top: 0, left: 0 })
+  const [sparkPos, setSparkPos] = useState<SparkPos>({ top: 0, left: 0 })
 
   useEffect(() => {
     if (!sparkOpen) return
@@ -420,46 +504,68 @@ export default function Page() {
       setSparkPos({ top, left, w, h })
     }
     compute()
-    window.addEventListener('scroll', compute, { passive: true })
-    window.addEventListener('resize', compute)
+    window.addEventListener("scroll", compute, { passive: true })
+    window.addEventListener("resize", compute)
     return () => {
-      window.removeEventListener('scroll', compute)
-      window.removeEventListener('resize', compute)
+      window.removeEventListener("scroll", compute)
+      window.removeEventListener("resize", compute)
     }
   }, [sparkOpen])
 
-  const sparkEnterTrigger = () => { clearTimeout(sparkTriggerTimer.current); setSparkTriggerHover(true) }
-  const sparkLeaveTrigger = () => { clearTimeout(sparkTriggerTimer.current); sparkTriggerTimer.current = setTimeout(() => setSparkTriggerHover(false), 120) }
-  const sparkEnterPopup = () => { clearTimeout(sparkPopupTimer.current); setSparkPopupHover(true) }
-  const sparkLeavePopup = () => { clearTimeout(sparkPopupTimer.current); sparkPopupTimer.current = setTimeout(() => setSparkPopupHover(false), 120) }
-
-  useEffect(() => () => {
+  const sparkEnterTrigger = () => {
     clearTimeout(sparkTriggerTimer.current)
+    setSparkTriggerHover(true)
+  }
+  const sparkLeaveTrigger = () => {
+    clearTimeout(sparkTriggerTimer.current)
+    sparkTriggerTimer.current = setTimeout(() => setSparkTriggerHover(false), 120)
+  }
+  const sparkEnterPopup = () => {
     clearTimeout(sparkPopupTimer.current)
-  }, [])
+    setSparkPopupHover(true)
+  }
+  const sparkLeavePopup = () => {
+    clearTimeout(sparkPopupTimer.current)
+    sparkPopupTimer.current = setTimeout(() => setSparkPopupHover(false), 120)
+  }
+
+  useEffect(
+    () => () => {
+      clearTimeout(sparkTriggerTimer.current)
+      clearTimeout(sparkPopupTimer.current)
+    },
+    []
+  )
 
   // Fetch GitHub contributions from public API
   useEffect(() => {
     async function fetchContributions() {
       try {
         setContributionsLoading(true)
-        const res = await fetch('https://github-contributions-api.deno.dev/yashranaway.json')
-        const data = await res.json()
+        const res = await fetch("https://github-contributions-api.deno.dev/yashranaway.json")
+        const data: {
+          contributions?: Array<
+            Array<{ date?: string; contributionCount?: number; contributionLevel?: string }>
+          >
+        } = await res.json()
 
         if (data?.contributions && Array.isArray(data.contributions)) {
-          const levelMap = { NONE: 0, FIRST_QUARTILE: 1, SECOND_QUARTILE: 2, THIRD_QUARTILE: 3, FOURTH_QUARTILE: 4 }
-          const mapped = data.contributions.flat()
-            .filter(item => item && item.date && 'contributionCount' in item && 'contributionLevel' in item)
-            .map(item => ({
+          const mapped: Contribution[] = data.contributions
+            .flat()
+            .filter(
+              (item): item is { date: string; contributionCount: number; contributionLevel: string } =>
+                !!item && !!item.date && "contributionCount" in item && "contributionLevel" in item
+            )
+            .map((item) => ({
               date: item.date,
               count: Number(item.contributionCount || 0),
-              level: (levelMap[item.contributionLevel] || 0),
+              level: (LEVEL_MAP[item.contributionLevel] ?? 0) as 0 | 1 | 2 | 3 | 4,
             }))
 
           // Filter to last year
           const oneYearAgo = new Date()
           oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
-          const filtered = mapped.filter(item => new Date(item.date) >= oneYearAgo)
+          const filtered = mapped.filter((item) => new Date(item.date) >= oneYearAgo)
 
           setTotalContributions(mapped.reduce((sum, item) => sum + item.count, 0))
           setContributions(filtered)
@@ -480,7 +586,7 @@ export default function Page() {
 
   // Cal.com floating button
   useEffect(() => {
-    (async function () {
+    ;(async function () {
       const cal = await getCalApi({ namespace: "secret" })
       cal("floatingButton", {
         calLink: "aditya-garud/secret",
@@ -505,78 +611,77 @@ export default function Page() {
 
   // Global click handler for letter animations
   const triggerRandomLetterEffect = () => {
-    const letters = document.querySelectorAll('.letter');
-    if (letters.length === 0) return;
-    
+    const letters = document.querySelectorAll<HTMLElement>(".letter")
+    if (letters.length === 0) return
+
     // Pick random letter
-    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-    
+    const randomLetter = letters[Math.floor(Math.random() * letters.length)]
 
     const effects = [
       // Colors
-      'color-red', 'color-blue', 'color-green', 'color-purple', 'color-orange',
-      'color-pink', 'color-yellow', 'color-cyan', 'color-lime', 'color-indigo',
-      'color-teal', 'color-rose', 'color-amber', 'color-emerald', 'color-violet',
-      
+      "color-red", "color-blue", "color-green", "color-purple", "color-orange",
+      "color-pink", "color-yellow", "color-cyan", "color-lime", "color-indigo",
+      "color-teal", "color-rose", "color-amber", "color-emerald", "color-violet",
+
       // Scales
-      'scale-tiny', 'scale-small', 'scale-big', 'scale-huge', 'scale-crazy',
-      
+      "scale-tiny", "scale-small", "scale-big", "scale-huge", "scale-crazy",
+
       // Rotations
-      'rotate-left', 'rotate-right', 'rotate-crazy', 'rotate-flip', 'rotate-spin',
-      
+      "rotate-left", "rotate-right", "rotate-crazy", "rotate-flip", "rotate-spin",
+
       // Basic animations
-      'shake', 'bounce', 'wobble', 'flip', 'pulse-big', 'pulse-crazy',
-      
+      "shake", "bounce", "wobble", "flip", "pulse-big", "pulse-crazy",
+
       // Glow effects
-      'glow', 'glow-intense', 'glow-rainbow', 'neon-glow',
-      
+      "glow", "glow-intense", "glow-rainbow", "neon-glow",
+
       // Rainbow and gradients
-      'rainbow', 'rainbow-fast', 'fire-gradient', 'ocean-gradient', 'sunset-gradient',
-      
+      "rainbow", "rainbow-fast", "fire-gradient", "ocean-gradient", "sunset-gradient",
+
       // Crazy animations
-      'matrix-rain', 'glitch', 'elastic', 'jello', 'rubber', 'swing',
-      'tada', 'heartbeat', 'flash', 'zoom-in', 'zoom-out', 'roll-in',
-      'roll-out', 'fade-in-down', 'fade-in-up', 'slide-in', 'typewriter',
-      'lightning', 'earthquake', 'tornado', 'explode', 'implode',
-      
+      "matrix-rain", "glitch", "elastic", "jello", "rubber", "swing",
+      "tada", "heartbeat", "flash", "zoom-in", "zoom-out", "roll-in",
+      "roll-out", "fade-in-down", "fade-in-up", "slide-in", "typewriter",
+      "lightning", "earthquake", "tornado", "explode", "implode",
+
       // 3D effects
-      'flip-x', 'flip-y', 'flip-z', 'rotate-3d', 'cube-flip', 'card-flip',
-      
+      "flip-x", "flip-y", "flip-z", "rotate-3d", "cube-flip", "card-flip",
+
       // Particle effects
-      'sparkle', 'confetti', 'fireworks', 'snow', 'rain',
-      
+      "sparkle", "confetti", "fireworks", "snow", "rain",
+
       // Distortion effects
-      'stretch-x', 'stretch-y', 'skew-left', 'skew-right', 'wave', 'ripple'
-    ];
-    
+      "stretch-x", "stretch-y", "skew-left", "skew-right", "wave", "ripple",
+    ]
+
     // Pick random effect
-    const randomEffect = effects[Math.floor(Math.random() * effects.length)];
-    
+    const randomEffect = effects[Math.floor(Math.random() * effects.length)]
+
     // Apply effect
-    randomLetter.classList.add('letter-active', randomEffect);
-    
+    randomLetter.classList.add("letter-active", randomEffect)
+
     // Remove effect after 2-3 seconds
-    const duration = 2000 + Math.random() * 1000;
+    const duration = 2000 + Math.random() * 1000
     setTimeout(() => {
-      randomLetter.classList.remove('letter-active', randomEffect);
-    }, duration);
-  };
+      randomLetter.classList.remove("letter-active", randomEffect)
+    }, duration)
+  }
 
   useEffect(() => {
     // Global click listener - ANY click triggers letter animation
-    const handleGlobalClick = (e) => {
+    const handleGlobalClick = (e: MouseEvent) => {
       // Ignore clicks on elements marked to skip letter effects
-      const target = e.target;
-      if (target && target.closest && target.closest('[data-no-letter]')) return;
-      triggerRandomLetterEffect();
-    };
+      const target = e.target as HTMLElement | null
+      if (target && target.closest && target.closest("[data-no-letter]")) return
+      triggerRandomLetterEffect()
+    }
 
     // Add click listener to document
-    document.addEventListener('click', handleGlobalClick);
+    document.addEventListener("click", handleGlobalClick)
 
     return () => {
-      document.removeEventListener('click', handleGlobalClick);
-    };
+      document.removeEventListener("click", handleGlobalClick)
+    }
   }, [])
 
   // Scroll progress bar logic
@@ -588,17 +693,13 @@ export default function Page() {
       setScrollProgress(pct)
     }
     calcProgress()
-    window.addEventListener('scroll', calcProgress, { passive: true })
-    window.addEventListener('resize', calcProgress)
+    window.addEventListener("scroll", calcProgress, { passive: true })
+    window.addEventListener("resize", calcProgress)
     return () => {
-      window.removeEventListener('scroll', calcProgress)
-      window.removeEventListener('resize', calcProgress)
+      window.removeEventListener("scroll", calcProgress)
+      window.removeEventListener("resize", calcProgress)
     }
   }, [])
-
-
-
-
 
   return (
     <ClickSpark
@@ -611,10 +712,8 @@ export default function Page() {
       extraScale={1.0}
     >
       <div className={`min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-white relative transition-colors duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-        isTransitioning ? 'transition-all' : ''
+        isTransitioning ? "transition-all" : ""
       }`}>
-        {/* Interactive Ripple Grid Background */}
-        <BackgroundRippleEffect rows={20} cols={40} cellSize={50} />
       {/* Header */}
       <header className="container mx-auto px-4 py-4 sm:py-6 flex justify-center items-center animate-fade-in relative z-50">
         <Button
@@ -624,32 +723,36 @@ export default function Page() {
           onClick={handleThemeToggle}
           disabled={isTransitioning}
           className={`relative rounded-full w-10 h-10 sm:w-12 sm:h-12 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-zinc-100 dark:hover:bg-zinc-800 ${
-            isTransitioning ? 'opacity-70 cursor-wait' : ''
+            isTransitioning ? "opacity-70 cursor-wait" : ""
           }`}
           aria-label={mounted ? `Switch to ${theme === "dark" ? "light" : "dark"} mode` : "Toggle theme"}
         >
           {/* Sun Icon - shows in dark mode to switch to light */}
-          <Sun 
+          <Sun
             className={`absolute h-5 w-5 sm:h-6 sm:w-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-              theme === "dark" 
-                ? 'rotate-0 scale-100 opacity-100' 
-                : 'rotate-[360deg] scale-0 opacity-0'
+              isDark
+                ? "rotate-0 scale-100 opacity-100"
+                : "rotate-[360deg] scale-0 opacity-0"
             }`}
             style={{
-              filter: theme === "dark" ? 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.5))' : 'none',
-              transition: 'all 700ms cubic-bezier(0.4, 0, 0.2, 1), filter 700ms ease-in-out'
+              filter: isDark ? "drop-shadow(0 0 4px rgba(251, 191, 36, 0.5))" : "none",
+              transitionProperty: "all, filter",
+              transitionDuration: "700ms, 700ms",
+              transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1), ease-in-out",
             }}
           />
           {/* Moon Icon - shows in light mode to switch to dark */}
-          <Moon 
+          <Moon
             className={`absolute h-5 w-5 sm:h-6 sm:w-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-              theme === "dark" 
-                ? 'rotate-[-360deg] scale-0 opacity-0' 
-                : 'rotate-0 scale-100 opacity-100'
+              isDark
+                ? "rotate-[-360deg] scale-0 opacity-0"
+                : "rotate-0 scale-100 opacity-100"
             }`}
             style={{
-              filter: theme === "dark" ? 'none' : 'drop-shadow(0 0 4px rgba(147, 197, 253, 0.5))',
-              transition: 'all 700ms cubic-bezier(0.4, 0, 0.2, 1), filter 700ms ease-in-out'
+              filter: isDark ? "none" : "drop-shadow(0 0 4px rgba(147, 197, 253, 0.5))",
+              transitionProperty: "all, filter",
+              transitionDuration: "700ms, 700ms",
+              transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1), ease-in-out",
             }}
           />
           <span className="sr-only">Toggle theme</span>
@@ -686,7 +789,7 @@ export default function Page() {
                   </span>.
                 </h1>
               </ClickSpark>
-              
+
               <div className="space-y-4 sm:space-y-6 max-w-3xl">
                 <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 -mt-2">
                   been here for <TimeCounter startDate={new Date("2005-01-03")} /> years
@@ -732,14 +835,14 @@ export default function Page() {
                   </div>,
                   document.body
                 )}
-          
+
                 <div className="space-y-2 sm:space-y-3">
                   <h2 className="text-base sm:text-lg md:text-xl font-medium text-zinc-900 dark:text-white">about;</h2>
-                  
+
                   <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     i&apos;m into machine learning, agents, and shipping things i probably shouldn&apos;t
                   </p>
-                  
+
                   <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     Studying at{" "}
                     <a
@@ -752,7 +855,7 @@ export default function Page() {
                       Vishwakarma University
                     </a>
                   </p>
-                  
+
                   <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     I live in Pune, Maharashtra. You can keep up with me on{" "}
                     <LinkPreview
@@ -809,7 +912,7 @@ export default function Page() {
                 </div>
               </div>
             </div>
-            
+
             {/* Matrix Component - aligned with top of heading */}
             <div className="hidden lg:flex items-start justify-center self-start flex-shrink-0">
               <RandomMatrix
@@ -835,7 +938,7 @@ export default function Page() {
 
 
         {/* GitHub Activity */}
-        <section className="space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+        <section className="space-y-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           {contributionsLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" />
@@ -848,34 +951,34 @@ export default function Page() {
                 blockMargin={5}
                 blockRadius={3}
                 fontSize={13}
-                colorScheme={mounted && theme === 'dark' ? 'dark' : 'light'}
+                colorScheme={mounted && theme === "dark" ? "dark" : "light"}
                 maxLevel={4}
-                hideTotalCount={false}
-                hideColorLegend={false}
-                hideMonthLabels={false}
+                showTotalCount
+                showColorLegend
+                showMonthLabels
                 theme={{
                   dark: [
-                    'rgb(22, 27, 34)',
-                    'rgb(14, 68, 41)',
-                    'rgb(0, 109, 50)',
-                    'rgb(38, 166, 65)',
-                    'rgb(57, 211, 83)',
+                    "rgb(22, 27, 34)",
+                    "rgb(14, 68, 41)",
+                    "rgb(0, 109, 50)",
+                    "rgb(38, 166, 65)",
+                    "rgb(57, 211, 83)",
                   ],
                   light: [
-                    'rgb(235, 237, 240)',
-                    'rgb(155, 233, 168)',
-                    'rgb(64, 196, 99)',
-                    'rgb(48, 161, 78)',
-                    'rgb(33, 110, 57)',
+                    "rgb(235, 237, 240)",
+                    "rgb(155, 233, 168)",
+                    "rgb(64, 196, 99)",
+                    "rgb(48, 161, 78)",
+                    "rgb(33, 110, 57)",
                   ],
                 }}
                 labels={{
-                  months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                  weekdays: ['', 'Mon', '', 'Wed', '', 'Fri', ''],
-                  totalCount: '{{count}} contributions in the last year',
+                  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                  weekdays: ["", "Mon", "", "Wed", "", "Fri", ""],
+                  totalCount: "{{count}} contributions in the last year",
                 }}
                 style={{
-                  color: mounted && theme === 'dark' ? 'rgb(139, 148, 158)' : 'rgb(100, 100, 100)',
+                  color: mounted && theme === "dark" ? "rgb(139, 148, 158)" : "rgb(100, 100, 100)",
                 }}
               />
             </div>
@@ -883,11 +986,11 @@ export default function Page() {
         </section>
 
         {/* Technical Skills Section */}
-        <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+        <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-center text-zinc-900 dark:text-white">
             Technical Arsenal
          </h2>
-          
+
           {/* Programming Languages */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 auto-rows-fr items-stretch">
             <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
@@ -900,22 +1003,22 @@ export default function Page() {
                         <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
-                    if (skill.name === 'C') {
+                    if (skill.name === "C") {
                       return (
                         <CodeHover key={skill.name} lang="c">
                           {chip}
                         </CodeHover>
                       )
                     }
-                    const map = {
-                      'C++': 'cpp',
-                      'Java': 'java',
-                      'Python': 'python',
-                      'JavaScript': 'javascript',
-                      'TypeScript': 'typescript',
-                      'Rust': 'rust',
-                      'Go': 'go',
-                      'Ruby': 'ruby',
+                    const map: Record<string, string> = {
+                      "C++": "cpp",
+                      "Java": "java",
+                      "Python": "python",
+                      "JavaScript": "javascript",
+                      "TypeScript": "typescript",
+                      "Rust": "rust",
+                      "Go": "go",
+                      "Ruby": "ruby",
                     }
                     const langKey = map[skill.name]
                     if (langKey) {
@@ -944,13 +1047,13 @@ export default function Page() {
                         <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
-                    const map = {
-                      'HTML5': 'html',
-                      'CSS3': 'css',
-                      'Bootstrap': 'bootstrap',
-                      'React': 'react',
-                      'Tailwind CSS': 'tailwind',
-                      'Next.js': 'nextjs',
+                    const map: Record<string, string> = {
+                      "HTML5": "html",
+                      "CSS3": "css",
+                      "Bootstrap": "bootstrap",
+                      "React": "react",
+                      "Tailwind CSS": "tailwind",
+                      "Next.js": "nextjs",
                     }
                     const langKey = map[skill.name]
                     if (langKey) {
@@ -977,13 +1080,13 @@ export default function Page() {
                         <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
-                    const map = {
-                      'Node.js': 'node',
-                      'Express.js': 'express',
-                      'MongoDB': 'mongodb',
-                      'MySQL': 'mysql',
-                      'PostgreSQL': 'postgresql',
-                      'Prisma': 'prisma',
+                    const map: Record<string, string> = {
+                      "Node.js": "node",
+                      "Express.js": "express",
+                      "MongoDB": "mongodb",
+                      "MySQL": "mysql",
+                      "PostgreSQL": "postgresql",
+                      "Prisma": "prisma",
                     }
                     const langKey = map[skill.name]
                     if (langKey) {
@@ -1010,12 +1113,12 @@ export default function Page() {
                         <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
-                    const map = {
-                      'TensorFlow': 'tensorflow',
-                      'PyTorch': 'pytorch',
-                      'OpenCV': 'opencv',
-                      'scikit-learn': 'sklearn',
-                      'Transformers': 'transformers',
+                    const map: Record<string, string> = {
+                      "TensorFlow": "tensorflow",
+                      "PyTorch": "pytorch",
+                      "OpenCV": "opencv",
+                      "scikit-learn": "sklearn",
+                      "Transformers": "transformers",
                     }
                     const langKey = map[skill.name]
                     if (langKey) {
@@ -1042,15 +1145,15 @@ export default function Page() {
                         <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
-                    const map = {
-                      'Linux': 'linux',
-                      'Git': 'git',
-                      'VS Code': 'vscode',
-                      'Docker': 'docker',
-                      'Firebase': 'firebase',
-                      'AWS': 'aws',
-                      'Vercel': 'vercel',
-                      'Apple': 'apple',
+                    const map: Record<string, string> = {
+                      "Linux": "linux",
+                      "Git": "git",
+                      "VS Code": "vscode",
+                      "Docker": "docker",
+                      "Firebase": "firebase",
+                      "AWS": "aws",
+                      "Vercel": "vercel",
+                      "Apple": "apple",
                     }
                     const langKey = map[skill.name]
                     if (langKey) {
@@ -1077,12 +1180,12 @@ export default function Page() {
                         <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
                       </div>
                     )
-                    const map = {
-                      'Arduino': 'arduino',
-                      'IoT Programming': 'iot',
-                      'Discord Bot Dev': 'discord',
-                      'Discord.js': 'discordjs',
-                      'Discord.py': 'discordpy',
+                    const map: Record<string, string> = {
+                      "Arduino": "arduino",
+                      "IoT Programming": "iot",
+                      "Discord Bot Dev": "discord",
+                      "Discord.js": "discordjs",
+                      "Discord.py": "discordpy",
                     }
                     const langKey = map[skill.name]
                     if (langKey) {
@@ -1105,7 +1208,7 @@ export default function Page() {
         {/* Open Source Section */}
         <section
           className="space-y-6 sm:space-y-8 animate-fade-in-up opensrc"
-          style={{ animationDelay: '0.5s' }}
+          style={{ animationDelay: "0.5s" }}
           data-no-letter
         >
           <div className="flex items-baseline justify-between gap-4 flex-wrap">
@@ -1138,7 +1241,6 @@ export default function Page() {
                         subtitle={org.description}
                         href={org.siteUrl}
                         avatar={org.iconUrl}
-                        accent={org.accent}
                       >
                         <span className="font-mono text-sm text-zinc-900 dark:text-white truncate">
                           {org.label}
@@ -1231,7 +1333,7 @@ export default function Page() {
         </section>
 
         {/* Projects Section */}
-        <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+        <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
           <h2 className="text-xl sm:text-2xl md:text-3xl text-center font-medium text-zinc-900 dark:text-white">
             Projects
           </h2>
@@ -1242,11 +1344,11 @@ export default function Page() {
                 onMouseEnter={() => setHoveredProject(index)}
                 onMouseLeave={() => setHoveredProject(null)}
                 className={`relative p-4 sm:p-6 rounded-xl bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 transition-all duration-300 ${
-                  project.size === 'large' ? 'md:col-span-2 lg:col-span-2' :
-                  project.size === 'medium' ? 'md:col-span-2 lg:col-span-1' :
-                  ''
+                  project.size === "large" ? "md:col-span-2 lg:col-span-2" :
+                  project.size === "medium" ? "md:col-span-2 lg:col-span-1" :
+                  ""
                 } ${
-                  hoveredProject !== null && hoveredProject !== index ? 'blur-sm scale-[0.98] opacity-60' : 'shadow-lg'
+                  hoveredProject !== null && hoveredProject !== index ? "blur-sm scale-[0.98] opacity-60" : "shadow-lg"
                 }`}
               >
                 <div className="flex flex-col h-full gap-2 sm:gap-3">
@@ -1292,7 +1394,7 @@ export default function Page() {
         </section>
 
         {/* Contact Section */}
-        <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+        <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: "0.8s" }}>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-zinc-900 dark:text-white">
             Get in touch
           </h2>
@@ -1307,7 +1409,7 @@ export default function Page() {
                 <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
               </a>
             </p>
-            
+
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6">
               <LinkPreview
                 title="LinkedIn • Aditya Garud"
@@ -1327,7 +1429,7 @@ export default function Page() {
                   <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
                 </a>
               </LinkPreview>
-              
+
               <LinkPreview
                 title="X • yashranaway"
                 subtitle="Follow me on X"
@@ -1346,7 +1448,7 @@ export default function Page() {
                   <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
                 </a>
               </LinkPreview>
-              
+
               <LinkPreview
                 title="GitHub • yashranaway"
                 subtitle="Open-source projects and profile"
@@ -1365,7 +1467,7 @@ export default function Page() {
                   <span className="absolute bottom-0 left-0 w-0 h-px bg-zinc-400 dark:bg-zinc-500 group-hover:w-full transition-all duration-300 ease-out"></span>
                 </a>
               </LinkPreview>
-              
+
               <a
                 href="https://coff.ee/yashranaway"
                 target="_blank"
