@@ -2,25 +2,48 @@
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 
+export interface ContribChartDatum {
+  week: string
+  l1: number
+  l2: number
+  l3: number
+  l4: number
+  total: number
+}
+
+interface ContribAreaChartProps {
+  data: ContribChartDatum[]
+  total: number
+  year: number
+}
+
+type LevelKey = "l1" | "l2" | "l3" | "l4"
+
 // GitHub-style contribution-level palette (dark theme)
-const LEVEL_COLORS = {
+const LEVEL_COLORS: Record<LevelKey, string> = {
   l1: "#0e4429",
   l2: "#006d32",
   l3: "#26a641",
   l4: "#39d353",
 }
-const LEVEL_LABELS = {
+const LEVEL_LABELS: Record<LevelKey, string> = {
   l1: "low",
   l2: "med",
   l3: "high",
   l4: "peak",
 }
 
-function CustomTooltip({ active, payload, label }) {
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: Array<{ payload?: ContribChartDatum }>
+  label?: string
+}
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload || !payload.length) return null
-  const row = payload[0]?.payload || {}
+  const row = payload[0]?.payload || ({} as Partial<ContribChartDatum>)
   const total = row.total ?? 0
-  const order = ["l4", "l3", "l2", "l1"]
+  const order: LevelKey[] = ["l4", "l3", "l2", "l1"]
   return (
     <div className="rounded-md border border-zinc-700 bg-zinc-900/95 backdrop-blur px-3 py-2 shadow-xl min-w-[160px]">
       <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-500">week of</div>
@@ -42,7 +65,7 @@ function CustomTooltip({ active, payload, label }) {
   )
 }
 
-export default function ContribAreaChart({ data, total, year }) {
+export default function ContribAreaChart({ data, total, year }: ContribAreaChartProps) {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex items-baseline justify-between mb-2">
@@ -51,7 +74,7 @@ export default function ContribAreaChart({ data, total, year }) {
           <div className="mt-1 font-mono text-2xl text-white tabular-nums">{total}</div>
         </div>
         <div className="flex items-center gap-2.5">
-          {Object.entries(LEVEL_LABELS).map(([k, lbl]) => (
+          {(Object.entries(LEVEL_LABELS) as Array<[LevelKey, string]>).map(([k, lbl]) => (
             <div key={k} className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.14em] text-zinc-500">
               <span className="w-2 h-2 rounded-sm" style={{ background: LEVEL_COLORS[k] }} />
               {lbl}
@@ -64,7 +87,7 @@ export default function ContribAreaChart({ data, total, year }) {
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 8, right: 10, left: 0, bottom: 0 }}>
             <defs>
-              {Object.entries(LEVEL_COLORS).map(([k, c]) => (
+              {(Object.entries(LEVEL_COLORS) as Array<[LevelKey, string]>).map(([k, c]) => (
                 <linearGradient key={k} id={`grad-${k}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={c} stopOpacity={0.85} />
                   <stop offset="100%" stopColor={c} stopOpacity={0.35} />
