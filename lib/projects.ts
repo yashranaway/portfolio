@@ -10,6 +10,7 @@ export interface Project {
   description: string
   size: ProjectSize
   repo?: string
+  live?: string
   stack: TechItem[]
 }
 
@@ -28,9 +29,19 @@ export const tech = {
   opencv:    { name: "OpenCV", iconUrl: "https://skillicons.dev/icons?i=opencv" },
   tensorflow:{ name: "TensorFlow", iconUrl: "https://skillicons.dev/icons?i=tensorflow" },
   arduino:   { name: "Arduino / Embedded", iconUrl: "https://skillicons.dev/icons?i=arduino" },
+  swift:     { name: "Swift", iconUrl: "https://skillicons.dev/icons?i=swift" },
+  docker:    { name: "Docker", iconUrl: "https://skillicons.dev/icons?i=docker" },
 } satisfies Record<string, TechItem>
 
 export const projects: Project[] = [
+  {
+    title: "Headless",
+    description: "Persistent browser control for AI agents — semantic role-based actions instead of Playwright scripts or screen coordinates. WKWebView on macOS, sandboxed Chromium on Linux, with built-in recording and diagnostics.",
+    size: "large",
+    repo: "https://github.com/SarthakWade/headless",
+    live: "https://headless-web-pi.vercel.app/",
+    stack: [tech.ts, tech.node, tech.swift, tech.docker],
+  },
   {
     title: "NetPulse Monitor",
     description: "Decentralized uptime monitor. Independent validators verify checks and are paid via micropayments.",

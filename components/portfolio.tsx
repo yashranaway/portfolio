@@ -1117,19 +1117,34 @@ export function Portfolio({ contributions }: PortfolioProps) {
                     <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white transition-colors">
                       {project.title}
                     </h3>
-                    {project.repo && (
-                      <a
-                        href={project.repo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-white transition-colors flex-shrink-0 mt-0.5"
-                        aria-label={`${project.title} GitHub repository`}
-                        data-no-letter
-                      >
-                        <FaGithub className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
-                      </a>
-                    )}
+                    <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
+                      {project.live && (
+                        <a
+                          href={project.live}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-white transition-colors"
+                          aria-label={`${project.title} live site`}
+                          data-no-letter
+                        >
+                          <ArrowUpRight className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                        </a>
+                      )}
+                      {project.repo && (
+                        <a
+                          href={project.repo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-white transition-colors"
+                          aria-label={`${project.title} GitHub repository`}
+                          data-no-letter
+                        >
+                          <FaGithub className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                        </a>
+                      )}
+                    </div>
                   </div>
                   <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed flex-1">
                     {project.description}
