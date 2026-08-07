@@ -83,35 +83,6 @@
   transform: translateY(20px);
 }
 
-@utility animate-pulse-slow {
-  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@utility animate-gradient-x {
-  animation: gradient-x 3s ease infinite;
-  background-size: 200% 200%;
-}
-
-@utility animate-shimmer {
-  animation: shimmer 2s ease-in-out infinite;
-  background-size: 200% 100%;
-}
-
-@utility bg-grid-pattern {
-  /* Grid Background Pattern */
-  background-image:
-    linear-gradient(to right, rgba(161, 161, 170, 0.15) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(161, 161, 170, 0.15) 1px, transparent 1px);
-  background-size: 80px 80px;
-
-  .dark & {
-    background-image:
-      linear-gradient(to right, rgba(161, 161, 170, 0.1) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(161, 161, 170, 0.1) 1px, transparent 1px);
-    background-size: 80px 80px;
-  }
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -212,43 +183,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes shine {
-  0% {
-    background-position: 100%;
-  }
-  100% {
-    background-position: -100%;
-  }
-}
-
-.shiny-text {
-  color: #b5b5b5a4; /* Adjust this color to change intensity/style */
-  background: linear-gradient(
-    120deg,
-    rgba(255, 255, 255, 0) 40%,
-    rgba(255, 255, 255, 0.8) 50%,
-    rgba(255, 255, 255, 0) 60%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  display: inline-block;
-  animation: shine 3s linear infinite;
-}
-
-.shiny-text.disabled {
-  animation: none;
 }
 
 /* Smooth theme transitions */
