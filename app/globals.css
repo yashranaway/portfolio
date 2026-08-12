@@ -16,6 +16,9 @@
 @theme {
   --breakpoint-xs: 475px;
 
+  /* Skills marquee. Duration is overridden per-instance via --marquee-duration. */
+  --animate-marquee: marquee var(--marquee-duration, 40s) linear infinite;
+
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
@@ -163,6 +166,13 @@
     min-height: 44px;
     min-width: 44px;
   }
+}
+
+/* Track holds two identical copies of the children, so -50% lands exactly on
+   the start of the second copy — the seam is invisible. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 @keyframes fadeIn {

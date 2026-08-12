@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, type ReactNode } from "react"
+import { createPortal } from "react-dom"
 
 interface Token {
   t: string
@@ -690,11 +691,6 @@ export default function CodeHover({
     )
   })
 
-  const posClasses =
-    position === "top"
-      ? "bottom-full left-1/2 -translate-x-1/2 mb-3"
-      : "top-full left-1/2 -translate-x-1/2 mt-3"
-
   const statusText = count >= fullLength ? "done" : "typing…"
 
   // For touch devices, show the popup on click instead of hover
@@ -719,9 +715,12 @@ export default function CodeHover({
     return () => window.removeEventListener("codehover-open", onOpen)
   }, [])
 
-  // When visible on mobile, compute fixed coordinates near the trigger
+  // Compute fixed coordinates near the trigger. This runs on every device, not
+  // just mobile: the popup is portalled to <body> so it can escape the skills
+  // marquee's overflow-hidden track (and that track's transform, which would
+  // otherwise become the containing block for a position:fixed child).
   useEffect(() => {
-    if (!hovering || !mobileMode) return
+    if (!hovering) return
     const compute = () => {
       const el = triggerRef.current
       if (!el) return
@@ -751,7 +750,7 @@ export default function CodeHover({
       window.removeEventListener("resize", compute)
       cancelAnimationFrame(raf)
     }
-  }, [hovering, mobileMode, position])
+  }, [hovering, position])
 
   return (
     <div
@@ -763,11 +762,12 @@ export default function CodeHover({
       data-no-letter
     >
       {children}
-      {hovering && (
+      {hovering &&
+        createPortal(
         <div
           ref={popupRef}
-          className={`${mobileMode ? "fixed" : "absolute " + posClasses} z-[60]`}
-          style={mobileMode ? { top: posStyle.top, left: posStyle.left } : undefined}
+          className="fixed z-[60]"
+          style={{ top: posStyle.top, left: posStyle.left }}
           aria-hidden={!mobileMode}
           role={mobileMode ? "dialog" : undefined}
         >
@@ -787,7 +787,8 @@ export default function CodeHover({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

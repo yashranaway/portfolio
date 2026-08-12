@@ -14,6 +14,7 @@ import LinkPreview from "@/components/LinkPreview"
 import VisitorBadge from "@/components/VisitorBadge"
 import { RandomMatrix } from "@/components/ui/matrix"
 import { HoverHighlightCard } from "@/components/ui/card-hover-effect"
+import { Marquee, MarqueeContent, MarqueeFade, MarqueeItem } from "@/components/ui/marquee"
 import { projects as projectsData } from "@/lib/projects"
 import type { Contribution } from "@/lib/github"
 import { getCalApi } from "@calcom/embed-react"
@@ -33,18 +34,8 @@ import batcatAvatar from "@/assets/batcat.jpg"
 interface Skill {
   name: string
   iconUrl: string
-  iconSrc?: string
-  color: string
-}
-
-interface SkillsData {
-  languages: Skill[]
-  frontend: Skill[]
-  backend: Skill[]
-  tools: Skill[]
-  ai: Skill[]
-  hardware: Skill[]
-  other: Skill[]
+  /** CodeHover preset key — omit for skills with no snippet. */
+  lang?: string
 }
 
 interface OpenSourcePR {
@@ -86,62 +77,49 @@ interface SparkPos {
   h?: number
 }
 
-// Organized skills data
-const skillsData: SkillsData = {
-  languages: [
-    { name: "C", iconUrl: "https://skillicons.dev/icons?i=c", color: "#A8B9CC" },
-    { name: "C++", iconUrl: "https://skillicons.dev/icons?i=cpp", color: "#00599C" },
-    { name: "Java", iconUrl: "https://skillicons.dev/icons?i=java", color: "#ED8B00" },
-    { name: "Python", iconUrl: "https://skillicons.dev/icons?i=python", color: "#3776AB" },
-    { name: "JavaScript", iconUrl: "https://skillicons.dev/icons?i=js", color: "#F7DF1E" },
-    { name: "TypeScript", iconUrl: "https://skillicons.dev/icons?i=ts", color: "#3178C6" },
-    { name: "Rust", iconUrl: "https://skillicons.dev/icons?i=rust", color: "#CE422B" },
-    { name: "Go", iconUrl: "https://skillicons.dev/icons?i=go", color: "#00ADD8" },
-    { name: "Ruby", iconUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg", color: "#CC342D" },
-  ],
-  frontend: [
-    { name: "HTML5", iconUrl: "https://skillicons.dev/icons?i=html", color: "#E34F26" },
-    { name: "CSS3", iconUrl: "https://skillicons.dev/icons?i=css", color: "#1572B6" },
-    { name: "Bootstrap", iconUrl: "https://skillicons.dev/icons?i=bootstrap", color: "#7952B3" },
-    { name: "React", iconUrl: "https://skillicons.dev/icons?i=react", color: "#61DAFB" },
-    { name: "Tailwind CSS", iconUrl: "https://skillicons.dev/icons?i=tailwind", color: "#38B2AC" },
-    { name: "Next.js", iconUrl: "https://skillicons.dev/icons?i=nextjs", color: "#000000" },
-  ],
-  backend: [
-    { name: "Node.js", iconUrl: "https://skillicons.dev/icons?i=nodejs", color: "#339933" },
-    { name: "Express.js", iconUrl: "https://skillicons.dev/icons?i=express", color: "#68CC00" },
-    { name: "MongoDB", iconUrl: "https://skillicons.dev/icons?i=mongodb", color: "#47A248" },
-    { name: "MySQL", iconUrl: "https://skillicons.dev/icons?i=mysql", color: "#4479A1" },
-    { name: "PostgreSQL", iconUrl: "https://skillicons.dev/icons?i=postgresql", color: "#336791" },
-    { name: "Prisma", iconUrl: "https://skillicons.dev/icons?i=prisma", color: "#0C344B" },
-  ],
-  tools: [
-    { name: "Linux", iconUrl: "https://skillicons.dev/icons?i=linux", color: "#FCC624" },
-    { name: "Git", iconUrl: "https://skillicons.dev/icons?i=git", color: "#F05032" },
-    { name: "VS Code", iconUrl: "https://skillicons.dev/icons?i=vscode", color: "#007ACC" },
-    { name: "Docker", iconUrl: "https://skillicons.dev/icons?i=docker", color: "#2496ED" },
-    { name: "Firebase", iconUrl: "https://skillicons.dev/icons?i=firebase", color: "#FFCA28" },
-    { name: "AWS", iconUrl: "https://skillicons.dev/icons?i=aws", color: "#FF9900" },
-    { name: "Vercel", iconUrl: "https://skillicons.dev/icons?i=vercel", color: "#000000" },
-    { name: "Apple", iconUrl: "https://skillicons.dev/icons?i=apple", color: "#A2AAAD" },
-  ],
-  ai: [
-    { name: "TensorFlow", iconUrl: "https://skillicons.dev/icons?i=tensorflow", color: "#FF6F00" },
-    { name: "PyTorch", iconUrl: "https://skillicons.dev/icons?i=pytorch", color: "#EE4C2C" },
-    { name: "OpenCV", iconUrl: "https://skillicons.dev/icons?i=opencv", color: "#5C3EE8" },
-    { name: "scikit-learn", iconUrl: "https://skillicons.dev/icons?i=sklearn", color: "#F7931E" },
-    { name: "Transformers", iconUrl: "/icons/huggingface.png", color: "#FFCC4D" },
-  ],
-  hardware: [
-    { name: "Arduino", iconUrl: "https://skillicons.dev/icons?i=arduino", color: "#00979D" },
-    { name: "IoT Programming", iconUrl: "https://skillicons.dev/icons?i=raspberrypi", color: "#A22846" },
-  ],
-  other: [
-    { name: "Discord Bot Dev", iconUrl: "https://skillicons.dev/icons?i=discord", color: "#5865F2" },
-    { name: "Discord.js", iconUrl: "https://skillicons.dev/icons?i=discordjs", color: "#5865F2" },
-    { name: "Discord.py", iconUrl: "/icons/discordpy.png", color: "#3776AB" },
-  ],
-}
+// One flat list feeding the marquee. `lang` is the CodeHover preset key —
+// previously this lived in six duplicated name→key maps inside the render.
+const skills: Skill[] = [
+  { name: "C", iconUrl: "https://skillicons.dev/icons?i=c", lang: "c" },
+  { name: "C++", iconUrl: "https://skillicons.dev/icons?i=cpp", lang: "cpp" },
+  { name: "Java", iconUrl: "https://skillicons.dev/icons?i=java", lang: "java" },
+  { name: "Python", iconUrl: "https://skillicons.dev/icons?i=python", lang: "python" },
+  { name: "JavaScript", iconUrl: "https://skillicons.dev/icons?i=js", lang: "javascript" },
+  { name: "TypeScript", iconUrl: "https://skillicons.dev/icons?i=ts", lang: "typescript" },
+  { name: "Rust", iconUrl: "https://skillicons.dev/icons?i=rust", lang: "rust" },
+  { name: "Go", iconUrl: "https://skillicons.dev/icons?i=go", lang: "go" },
+  { name: "Ruby", iconUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg", lang: "ruby" },
+  { name: "HTML5", iconUrl: "https://skillicons.dev/icons?i=html", lang: "html" },
+  { name: "CSS3", iconUrl: "https://skillicons.dev/icons?i=css", lang: "css" },
+  { name: "Bootstrap", iconUrl: "https://skillicons.dev/icons?i=bootstrap", lang: "bootstrap" },
+  { name: "React", iconUrl: "https://skillicons.dev/icons?i=react", lang: "react" },
+  { name: "Tailwind CSS", iconUrl: "https://skillicons.dev/icons?i=tailwind", lang: "tailwind" },
+  { name: "Next.js", iconUrl: "https://skillicons.dev/icons?i=nextjs", lang: "nextjs" },
+  { name: "Node.js", iconUrl: "https://skillicons.dev/icons?i=nodejs", lang: "node" },
+  { name: "Express.js", iconUrl: "https://skillicons.dev/icons?i=express", lang: "express" },
+  { name: "MongoDB", iconUrl: "https://skillicons.dev/icons?i=mongodb", lang: "mongodb" },
+  { name: "MySQL", iconUrl: "https://skillicons.dev/icons?i=mysql", lang: "mysql" },
+  { name: "PostgreSQL", iconUrl: "https://skillicons.dev/icons?i=postgresql", lang: "postgresql" },
+  { name: "Prisma", iconUrl: "https://skillicons.dev/icons?i=prisma", lang: "prisma" },
+  { name: "TensorFlow", iconUrl: "https://skillicons.dev/icons?i=tensorflow", lang: "tensorflow" },
+  { name: "PyTorch", iconUrl: "https://skillicons.dev/icons?i=pytorch", lang: "pytorch" },
+  { name: "OpenCV", iconUrl: "https://skillicons.dev/icons?i=opencv", lang: "opencv" },
+  { name: "scikit-learn", iconUrl: "https://skillicons.dev/icons?i=sklearn", lang: "sklearn" },
+  { name: "Transformers", iconUrl: "/icons/huggingface.png", lang: "transformers" },
+  { name: "Linux", iconUrl: "https://skillicons.dev/icons?i=linux", lang: "linux" },
+  { name: "Git", iconUrl: "https://skillicons.dev/icons?i=git", lang: "git" },
+  { name: "VS Code", iconUrl: "https://skillicons.dev/icons?i=vscode", lang: "vscode" },
+  { name: "Docker", iconUrl: "https://skillicons.dev/icons?i=docker", lang: "docker" },
+  { name: "Firebase", iconUrl: "https://skillicons.dev/icons?i=firebase", lang: "firebase" },
+  { name: "AWS", iconUrl: "https://skillicons.dev/icons?i=aws", lang: "aws" },
+  { name: "Vercel", iconUrl: "https://skillicons.dev/icons?i=vercel", lang: "vercel" },
+  { name: "Apple", iconUrl: "https://skillicons.dev/icons?i=apple", lang: "apple" },
+  { name: "Arduino", iconUrl: "https://skillicons.dev/icons?i=arduino", lang: "arduino" },
+  { name: "IoT Programming", iconUrl: "https://skillicons.dev/icons?i=raspberrypi", lang: "iot" },
+  { name: "Discord Bot Dev", iconUrl: "https://skillicons.dev/icons?i=discord", lang: "discord" },
+  { name: "Discord.js", iconUrl: "https://skillicons.dev/icons?i=discordjs", lang: "discordjs" },
+  { name: "Discord.py", iconUrl: "/icons/discordpy.png", lang: "discordpy" },
+]
 
 // Open Source contributions (curated, merged-only)
 const openSourceData: OpenSourceOrg[] = [
@@ -787,218 +765,25 @@ export function Portfolio({ contributions }: PortfolioProps) {
             Technical Arsenal
          </h2>
 
-          {/* Programming Languages */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 auto-rows-fr items-stretch">
-            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
-              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">Programming Languages</h3>
-                <div className="flex flex-wrap gap-2 items-start w-full">
-                  {skillsData.languages.map((skill) => {
-                    const chip = (
-                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
-                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
-                      </div>
-                    )
-                    if (skill.name === "C") {
-                      return (
-                        <CodeHover key={skill.name} lang="c">
-                          {chip}
-                        </CodeHover>
-                      )
-                    }
-                    const map: Record<string, string> = {
-                      "C++": "cpp",
-                      "Java": "java",
-                      "Python": "python",
-                      "JavaScript": "javascript",
-                      "TypeScript": "typescript",
-                      "Rust": "rust",
-                      "Go": "go",
-                      "Ruby": "ruby",
-                    }
-                    const langKey = map[skill.name]
-                    if (langKey) {
-                      return (
-                        <CodeHover key={skill.name} lang={langKey}>
-                          {chip}
-                        </CodeHover>
-                      )
-                    }
-                    return (
-                      <div key={skill.name}>
-                        {chip}
-                      </div>
-                    )
-                  })}
-                </div>
-            </div>
-
-            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
-              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">Frontend Development</h3>
-                <div className="flex flex-wrap gap-2 items-start">
-                  {skillsData.frontend.map((skill) => {
-                    const chip = (
-                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
-                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
-                      </div>
-                    )
-                    const map: Record<string, string> = {
-                      "HTML5": "html",
-                      "CSS3": "css",
-                      "Bootstrap": "bootstrap",
-                      "React": "react",
-                      "Tailwind CSS": "tailwind",
-                      "Next.js": "nextjs",
-                    }
-                    const langKey = map[skill.name]
-                    if (langKey) {
-                      return (
-                        <CodeHover key={skill.name} lang={langKey}>
-                          {chip}
-                        </CodeHover>
-                      )
-                    }
-                    return (
-                      <div key={skill.name}>{chip}</div>
-                    )
-                  })}
-                </div>
-            </div>
-
-            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
-              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">Backend & Databases</h3>
-                <div className="flex flex-wrap gap-2 items-start">
-                  {skillsData.backend.map((skill) => {
-                    const chip = (
-                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
-                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
-                      </div>
-                    )
-                    const map: Record<string, string> = {
-                      "Node.js": "node",
-                      "Express.js": "express",
-                      "MongoDB": "mongodb",
-                      "MySQL": "mysql",
-                      "PostgreSQL": "postgresql",
-                      "Prisma": "prisma",
-                    }
-                    const langKey = map[skill.name]
-                    if (langKey) {
-                      return (
-                        <CodeHover key={skill.name} lang={langKey}>
-                          {chip}
-                        </CodeHover>
-                      )
-                    }
-                    return (
-                      <div key={skill.name}>{chip}</div>
-                    )
-                  })}
-                </div>
-            </div>
-
-            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
-              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">AI & Machine Learning</h3>
-                <div className="flex flex-wrap gap-2 items-start">
-                  {skillsData.ai.map((skill) => {
-                    const chip = (
-                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
-                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
-                      </div>
-                    )
-                    const map: Record<string, string> = {
-                      "TensorFlow": "tensorflow",
-                      "PyTorch": "pytorch",
-                      "OpenCV": "opencv",
-                      "scikit-learn": "sklearn",
-                      "Transformers": "transformers",
-                    }
-                    const langKey = map[skill.name]
-                    if (langKey) {
-                      return (
-                        <CodeHover key={skill.name} lang={langKey}>
-                          {chip}
-                        </CodeHover>
-                      )
-                    }
-                    return (
-                      <div key={skill.name}>{chip}</div>
-                    )
-                  })}
-                </div>
-            </div>
-
-            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
-              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">DevOps & Tools</h3>
-                <div className="flex flex-wrap gap-2 items-start">
-                  {skillsData.tools.map((skill) => {
-                    const chip = (
-                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
-                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
-                      </div>
-                    )
-                    const map: Record<string, string> = {
-                      "Linux": "linux",
-                      "Git": "git",
-                      "VS Code": "vscode",
-                      "Docker": "docker",
-                      "Firebase": "firebase",
-                      "AWS": "aws",
-                      "Vercel": "vercel",
-                      "Apple": "apple",
-                    }
-                    const langKey = map[skill.name]
-                    if (langKey) {
-                      return (
-                        <CodeHover key={skill.name} lang={langKey}>
-                          {chip}
-                        </CodeHover>
-                      )
-                    }
-                    return (
-                      <div key={skill.name}>{chip}</div>
-                    )
-                  })}
-                </div>
-            </div>
-
-            <div className="p-3 sm:p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 h-full flex flex-col gap-3 sm:gap-4">
-              <h3 className="text-base sm:text-lg font-medium text-zinc-900 dark:text-white">Specialized Skills</h3>
-                <div className="flex flex-wrap gap-2 items-start">
-                  {[...skillsData.hardware, ...skillsData.other].map((skill) => {
-                    const chip = (
-                      <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                        <img src={skill.iconSrc || skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
-                        <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white">{skill.name}</span>
-                      </div>
-                    )
-                    const map: Record<string, string> = {
-                      "Arduino": "arduino",
-                      "IoT Programming": "iot",
-                      "Discord Bot Dev": "discord",
-                      "Discord.js": "discordjs",
-                      "Discord.py": "discordpy",
-                    }
-                    const langKey = map[skill.name]
-                    if (langKey) {
-                      return (
-                        <CodeHover key={skill.name} lang={langKey}>
-                          {chip}
-                        </CodeHover>
-                      )
-                    }
-                    return (
-                      <div key={skill.name}>{chip}</div>
-                    )
-                  })}
-                </div>
-            </div>
-
-          </div>
+          <Marquee>
+            <MarqueeFade side="left" />
+            <MarqueeFade side="right" />
+            <MarqueeContent speed={60} pauseOnHover>
+              {skills.map((skill) => {
+                const chip = (
+                  <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
+                    <img src={skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
+                    <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white whitespace-nowrap">{skill.name}</span>
+                  </div>
+                )
+                return (
+                  <MarqueeItem key={skill.name}>
+                    {skill.lang ? <CodeHover lang={skill.lang}>{chip}</CodeHover> : chip}
+                  </MarqueeItem>
+                )
+              })}
+            </MarqueeContent>
+          </Marquee>
         </section>
 
         {/* Open Source Section */}
