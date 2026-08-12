@@ -58,6 +58,30 @@ The whole thing is a single instruction: produce one self contained HTML file, r
 
 The rest is a checklist: every requested feature represented, backend and cross repo work included even when it is invisible in the UI, assumptions clearly separated from confirmed behaviour, and every demo button actually working.
 
+## The part that made it stick
+
+I got the idea from [Theo](https://theo.gg), looked at how he was using it, and then built the piece that made it work for me.
+
+The plan is not a file I open on my own machine. Any agent can write one, and it deploys through a tunnel as soon as it lands. So I read it wherever I am, usually on my phone, and so does everyone else I send the link to.
+
+<Mermaid caption="One link, whatever device is nearby. No repo, no build step, no screen sharing." chart={`
+flowchart LR
+  A[Any agent writes plan.html] --> B[Tunnel]
+  B --> C[Phone]
+  B --> D[Laptop]
+  B --> E[Anyone with the link]
+`} />
+
+Each plan also splits by where the work actually lands:
+
+| Change type | What the plan leads with |
+| --- | --- |
+| Frontend | Mockup in the product's own styling, then component and state map |
+| Backend | API contracts and data flow, then the repo level implementation map |
+| Both | The two views on one page, switchable, so nothing gets reviewed in isolation |
+
+Benchmarks and the acceptance checklist sit at the bottom of the same file. One artifact, one link, nothing to assemble later.
+
 ## When Markdown still wins
 
 Short plans. Three tasks and a decision, read once by one person, done by lunch. Reaching for HTML there is ceremony.
