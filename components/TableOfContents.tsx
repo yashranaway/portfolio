@@ -10,23 +10,25 @@ interface TableOfContentsProps {
   entries: TocEntry[]
 }
 
-// Geometry follows Fumadocs' TOC (packages/base-ui/src/components/toc/default.tsx).
-// Two details make it read smoothly, and both are easy to get wrong:
+// Geometry and active-tracking follow Fumadocs
+// (packages/base-ui/src/components/toc/default.tsx + packages/core/src/toc.tsx).
 //
-//  1. Depth changes are a cubic Bézier spanning the *gap between items*, with
-//     control points nudged 4px past each end. A tight corner at the item
-//     boundary looks kinked by comparison.
-//  2. The active thumb is the same path clipped to the active range, not a
-//     separate line — so it traces the curve exactly instead of cutting across.
+// Three details make it behave like the original:
+//
+//  1. Depth changes are a cubic Bézier spanning the gap between items, not a
+//     tight corner at the item boundary.
+//  2. The thumb is the same path clipped to the active range, so it traces the
+//     curve instead of cutting across it.
+//  3. *Multiple* headings are active at once — every one currently on screen —
+//     and the thumb spans first-active to last-active. Tracking a single index
+//     gives a one-item thumb that slides, which is not the same effect.
 
 const BASE = 8
 
-/** Horizontal position of the rail for a heading depth. */
 function lineOffset(depth: number): number {
   return depth <= 2 ? BASE : BASE + 8
 }
 
-/** Left padding of the link text for a heading depth. */
 function itemOffset(depth: number): number {
   return depth <= 2 ? BASE + 12 : BASE + 24
 }
@@ -35,16 +37,18 @@ interface Computed {
   d: string
   width: number
   height: number
-  /** [top, bottom] of each item, parallel to `entries`. */
   positions: Array<[number, number]>
-  /** Distance along the path at each item's [top, bottom], for the dot. */
   lengths: Array<[number, number]>
 }
 
 export default function TableOfContents({ entries }: TableOfContentsProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [computed, setComputed] = useState<Computed | null>(null)
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [range, setRange] = useState<[number, number]>([0, 0])
+  // Fumadocs sends the dot to the top of the range when scrolling up and the
+  // bottom when scrolling down, so it always leads the direction of travel.
+  const [isUp, setIsUp] = useState(false)
+  const prevRange = useRef<[number, number]>([0, 0])
 
   const measure = useCallback(() => {
     const container = containerRef.current
@@ -80,8 +84,6 @@ export default function TableOfContents({ entries }: TableOfContentsProps) {
 
     if (positions.length === 0) return
 
-    // Walk the path to find how far along it each item sits, so the dot can
-    // ride the curve via CSS offset-path.
     const probe = document.createElementNS("http://www.w3.org/2000/svg", "path")
     probe.setAttribute("d", d)
     const total = probe.getTotalLength()
@@ -106,34 +108,76 @@ export default function TableOfContents({ entries }: TableOfContentsProps) {
     return () => ro.disconnect()
   }, [measure])
 
-  // Scroll-spy: last heading whose top has passed the reading line.
+  // Active tracking. Every heading intersecting the viewport counts, so the
+  // thumb covers a range rather than a single item.
   useEffect(() => {
     if (entries.length === 0) return
-    const compute = () => {
-      const line = window.innerHeight / 3
-      let idx = 0
+
+    const elements = entries.map((e) => document.getElementById(e.id))
+    const visible = new Set<string>()
+
+    const apply = () => {
+      let start = -1
+      let end = -1
       for (let i = 0; i < entries.length; i++) {
-        const el = document.getElementById(entries[i].id)
-        if (el && el.getBoundingClientRect().top <= line) idx = i
-        else break
+        if (!visible.has(entries[i].id)) continue
+        if (start === -1) start = i
+        end = i
       }
-      const atBottom =
-        window.innerHeight + window.scrollY >= document.body.scrollHeight - 2
-      setActiveIndex(atBottom ? entries.length - 1 : idx)
+
+      // Nothing on screen (mid-section, long prose): fall back to the heading
+      // nearest the top of the viewport, matching Fumadocs.
+      if (start === -1) {
+        let best = -1
+        let min = Number.MAX_VALUE
+        for (let i = 0; i < elements.length; i++) {
+          const el = elements[i]
+          if (!el) continue
+          const d = Math.abs(el.getBoundingClientRect().top)
+          if (d < min) {
+            min = d
+            best = i
+          }
+        }
+        if (best === -1) return
+        start = best
+        end = best
+      }
+
+      const prev = prevRange.current
+      if (start !== prev[0] || end !== prev[1]) {
+        setIsUp(start < prev[0] || end < prev[1])
+        prevRange.current = [start, end]
+        setRange([start, end])
+      }
     }
-    compute()
-    window.addEventListener("scroll", compute, { passive: true })
-    window.addEventListener("resize", compute)
+
+    const observer = new IntersectionObserver(
+      (records) => {
+        for (const r of records) {
+          if (r.isIntersecting) visible.add(r.target.id)
+          else visible.delete(r.target.id)
+        }
+        apply()
+      },
+      { threshold: 0.9 }
+    )
+
+    for (const el of elements) if (el) observer.observe(el)
+    apply()
+    window.addEventListener("scroll", apply, { passive: true })
     return () => {
-      window.removeEventListener("scroll", compute)
-      window.removeEventListener("resize", compute)
+      observer.disconnect()
+      window.removeEventListener("scroll", apply)
     }
   }, [entries])
 
   if (entries.length < 2) return null
 
-  const span = computed?.positions[activeIndex]
-  const dotAt = computed?.lengths[activeIndex]?.[1]
+  const [startIdx, endIdx] = range
+  const top = computed?.positions[startIdx]?.[0]
+  const bottom = computed?.positions[endIdx]?.[1]
+  const dotAt = isUp ? computed?.lengths[startIdx]?.[0] : computed?.lengths[endIdx]?.[1]
 
   return (
     <nav aria-label="Table of contents" className="text-sm" data-no-letter>
@@ -148,7 +192,6 @@ export default function TableOfContents({ entries }: TableOfContentsProps) {
             className="pointer-events-none absolute top-0 left-0"
             style={{ width: computed.width, height: computed.height }}
           >
-            {/* Full rail, muted. */}
             <svg
               width={computed.width}
               height={computed.height}
@@ -164,17 +207,16 @@ export default function TableOfContents({ entries }: TableOfContentsProps) {
               />
             </svg>
 
-            {/* Same path, clipped to the active range — so the highlight
-                follows the curve rather than cutting across it. */}
             <svg
               width={computed.width}
               height={computed.height}
               viewBox={`0 0 ${computed.width} ${computed.height}`}
               className="absolute inset-0 transition-[clip-path] duration-300 ease-out"
               style={{
-                clipPath: span
-                  ? `polygon(0 ${span[0]}px, 100% ${span[0]}px, 100% ${span[1]}px, 0 ${span[1]}px)`
-                  : "polygon(0 0, 100% 0, 100% 0, 0 0)",
+                clipPath:
+                  top !== undefined && bottom !== undefined
+                    ? `polygon(0 ${top}px, 100% ${top}px, 100% ${bottom}px, 0 ${bottom}px)`
+                    : "polygon(0 0, 100% 0, 100% 0, 0 0)",
               }}
               aria-hidden
             >
@@ -186,7 +228,6 @@ export default function TableOfContents({ entries }: TableOfContentsProps) {
               />
             </svg>
 
-            {/* Dot rides the path itself via offset-path. */}
             {dotAt !== undefined && (
               <div
                 className="absolute top-0 left-0 size-1.5 rounded-full bg-zinc-900 transition-[offset-distance] duration-300 ease-out dark:bg-white"
@@ -199,24 +240,27 @@ export default function TableOfContents({ entries }: TableOfContentsProps) {
           </div>
         )}
 
-        {entries.map((entry, i) => (
-          <a
-            key={entry.id}
-            href={`#${entry.id}`}
-            data-active={i === activeIndex}
-            aria-current={i === activeIndex ? "location" : undefined}
-            style={{ paddingInlineStart: itemOffset(entry.depth) }}
-            className={cn(
-              "relative py-1.5 leading-snug transition-colors",
-              entry.depth === 3 && "text-[13px]",
-              i === activeIndex
-                ? "text-zinc-900 dark:text-white"
-                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-            )}
-          >
-            {entry.text}
-          </a>
-        ))}
+        {entries.map((entry, i) => {
+          const active = i >= startIdx && i <= endIdx
+          return (
+            <a
+              key={entry.id}
+              href={`#${entry.id}`}
+              data-active={active}
+              aria-current={active ? "location" : undefined}
+              style={{ paddingInlineStart: itemOffset(entry.depth) }}
+              className={cn(
+                "relative py-1.5 leading-snug transition-colors",
+                entry.depth === 3 && "text-[13px]",
+                active
+                  ? "text-zinc-900 dark:text-white"
+                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+              )}
+            >
+              {entry.text}
+            </a>
+          )
+        })}
       </div>
     </nav>
   )
