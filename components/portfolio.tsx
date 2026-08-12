@@ -13,6 +13,7 @@ import CodeHover from "@/components/CodeHover"
 import LinkPreview from "@/components/LinkPreview"
 import VisitorBadge from "@/components/VisitorBadge"
 import { RandomMatrix } from "@/components/ui/matrix"
+import { HoverHighlightCard } from "@/components/ui/card-hover-effect"
 import { projects as projectsData } from "@/lib/projects"
 import type { Contribution } from "@/lib/github"
 import { getCalApi } from "@calcom/embed-react"
@@ -179,8 +180,8 @@ const openSourceData: OpenSourceOrg[] = [
     key: "dodopayments",
     iconUrl: "https://github.com/dodopayments.png?size=128",
     label: "dodopayments",
-    sub: "3 repos",
-    merged: 20,
+    sub: "4 repos",
+    merged: 21,
     name: "Dodo Payments",
     description: "YC-backed global payments infrastructure. Stripe-style API for emerging markets.",
     siteUrl: "https://dodopayments.com",
@@ -213,6 +214,33 @@ const openSourceData: OpenSourceOrg[] = [
           { num: 6, title: "Add Stripe provider integration" },
           { num: 7, title: "Add Coupons migration for Lemon Squeezy" },
           { num: 9, title: "Specify product types for Stripe migration" },
+        ],
+      },
+      {
+        repo: "dodopayments/dualmark",
+        merged: 1,
+        prs: [
+          { num: 32, title: "Add @dualmark/sveltekit adapter" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "omacom",
+    iconUrl: "https://github.com/omacom-io.png?size=128",
+    label: "omacom-io/ttfx (Omarchy)",
+    merged: 2,
+    name: "Omacom",
+    description: "Opinionated Linux — the team behind Omarchy. ttfx is a parity-exact Rust port of terminaltexteffects, shipped as a single static binary.",
+    siteUrl: "https://omacom.io",
+    accent: "#8b5cf6",
+    repos: [
+      {
+        repo: "omacom-io/ttfx",
+        merged: 2,
+        prs: [
+          { num: 9, title: "Restore the cursor on SIGTERM" },
+          { num: 4, title: "Rebuild effects when the terminal is resized" },
         ],
       },
     ],
@@ -275,6 +303,13 @@ const openSourceData: OpenSourceOrg[] = [
     ],
   },
 ]
+
+// Derived from openSourceData so the summary line can't drift from the list.
+const openSourceTotals = {
+  merged: openSourceData.reduce((n, o) => n + o.merged, 0),
+  orgs: openSourceData.length,
+  repos: openSourceData.reduce((n, o) => n + o.repos.length, 0),
+}
 
 interface PortfolioProps {
   contributions: Contribution[]
@@ -977,7 +1012,7 @@ export function Portfolio({ contributions }: PortfolioProps) {
               Open Source
             </h2>
             <p className="text-xs sm:text-sm font-mono text-zinc-500 dark:text-zinc-400">
-              42 merged · 5 orgs · 7 repos
+              {openSourceTotals.merged} merged · {openSourceTotals.orgs} orgs · {openSourceTotals.repos} repos
             </p>
           </div>
 
@@ -1098,19 +1133,19 @@ export function Portfolio({ contributions }: PortfolioProps) {
           <h2 className="text-xl sm:text-2xl md:text-3xl text-center font-medium text-zinc-900 dark:text-white">
             Projects
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 auto-rows-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5 sm:gap-2 auto-rows-auto">
             {projectsData.map((project, index) => (
-              <div
+              <HoverHighlightCard
                 key={project.title}
+                hovered={hoveredProject === index}
                 onMouseEnter={() => setHoveredProject(index)}
                 onMouseLeave={() => setHoveredProject(null)}
-                className={`relative p-4 sm:p-6 rounded-xl bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 transition-all duration-300 ${
+                layoutId="projectHoverBackground"
+                className={
                   project.size === "large" ? "md:col-span-2 lg:col-span-2" :
                   project.size === "medium" ? "md:col-span-2 lg:col-span-1" :
                   ""
-                } ${
-                  hoveredProject !== null && hoveredProject !== index ? "blur-sm scale-[0.98] opacity-60" : "shadow-lg"
-                }`}
+                }
               >
                 <div className="flex flex-col h-full gap-2 sm:gap-3">
                   <div className="flex items-start justify-between gap-2">
@@ -1164,7 +1199,7 @@ export function Portfolio({ contributions }: PortfolioProps) {
                     </div>
                   )}
                 </div>
-              </div>
+              </HoverHighlightCard>
             ))}
           </div>
         </section>
