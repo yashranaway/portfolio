@@ -22,7 +22,10 @@ const nextConfig = {
 // serializable loader options, and a function reference can't be serialized.
 const withMDX = createMDX({
   options: {
-    remarkPlugins: [["remark-gfm"]],
+    // remark-frontmatter must come first: @next/mdx does not strip YAML on its
+    // own, so without it the --- block renders as visible body text. gray-matter
+    // only strips it in lib/posts.ts, which is a separate read for metadata.
+    remarkPlugins: [["remark-frontmatter"], ["remark-gfm"]],
     rehypePlugins: [["rehype-slug"], ["rehype-pretty-code", prettyCodeOptions]],
   },
 })
