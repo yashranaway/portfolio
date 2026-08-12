@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { AlignLeft } from "lucide-react"
 
 import type { TocEntry } from "@/lib/toc"
@@ -10,70 +10,103 @@ interface TableOfContentsProps {
   entries: TocEntry[]
 }
 
-/** Horizontal offset of the rail per heading depth. */
-const RAIL_X: Record<2 | 3, number> = { 2: 1, 3: 13 }
-/** Corner radius where the rail steps between depths. */
-const CORNER = 6
+// Geometry follows Fumadocs' TOC (packages/base-ui/src/components/toc/default.tsx).
+// Two details make it read smoothly, and both are easy to get wrong:
+//
+//  1. Depth changes are a cubic Bézier spanning the *gap between items*, with
+//     control points nudged 4px past each end. A tight corner at the item
+//     boundary looks kinked by comparison.
+//  2. The active thumb is the same path clipped to the active range, not a
+//     separate line — so it traces the curve exactly instead of cutting across.
 
-interface Geometry {
-  /** Full rail path, drawn muted. */
-  path: string
-  /** Vertical span of each item, indexed alongside `entries`. */
-  spans: Array<{ top: number; bottom: number }>
+const BASE = 8
+
+/** Horizontal position of the rail for a heading depth. */
+function lineOffset(depth: number): number {
+  return depth <= 2 ? BASE : BASE + 8
+}
+
+/** Left padding of the link text for a heading depth. */
+function itemOffset(depth: number): number {
+  return depth <= 2 ? BASE + 12 : BASE + 24
+}
+
+interface Computed {
+  d: string
+  width: number
   height: number
+  /** [top, bottom] of each item, parallel to `entries`. */
+  positions: Array<[number, number]>
+  /** Distance along the path at each item's [top, bottom], for the dot. */
+  lengths: Array<[number, number]>
 }
 
 export default function TableOfContents({ entries }: TableOfContentsProps) {
-  const listRef = useRef<HTMLUListElement | null>(null)
-  const itemRefs = useRef<Array<HTMLLIElement | null>>([])
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [computed, setComputed] = useState<Computed | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
-  const [geo, setGeo] = useState<Geometry | null>(null)
 
-  // Build the rail path from measured item positions. The rail steps sideways
-  // when the heading depth changes, with a rounded corner at each step — that
-  // is the whole visual trick, and it can't be done with a CSS border.
   const measure = useCallback(() => {
-    const list = listRef.current
-    if (!list) return
-    const items = itemRefs.current.filter((el): el is HTMLLIElement => el !== null)
-    if (items.length !== entries.length || items.length === 0) return
+    const container = containerRef.current
+    if (!container || container.clientHeight === 0 || entries.length === 0) return
 
-    const listTop = list.getBoundingClientRect().top
-    const spans = items.map((el) => {
-      const r = el.getBoundingClientRect()
-      return { top: r.top - listTop, bottom: r.bottom - listTop }
-    })
+    let width = 0
+    let height = 0
+    let d = ""
+    const positions: Array<[number, number]> = []
 
-    const xs = entries.map((e) => RAIL_X[e.depth])
-    let d = `M ${xs[0]} ${spans[0].top}`
     for (let i = 0; i < entries.length; i++) {
-      const x = xs[i]
-      const nextX = i === entries.length - 1 ? x : xs[i + 1]
-      const y = spans[i].bottom
-      if (nextX === x) {
-        d += ` L ${x} ${y}`
+      const el = container.querySelector<HTMLElement>(`a[href="#${CSS.escape(entries[i].id)}"]`)
+      if (!el) continue
+
+      const styles = getComputedStyle(el)
+      const x = lineOffset(entries[i].depth) + 0.5
+      const top = el.offsetTop + parseFloat(styles.paddingTop)
+      const bottom = el.offsetTop + el.clientHeight - parseFloat(styles.paddingBottom)
+
+      width = Math.max(width, x + 8)
+      height = Math.max(height, bottom)
+
+      if (positions.length === 0) {
+        d += ` M${x} ${top} L${x} ${bottom}`
       } else {
-        const dir = Math.sign(nextX - x)
-        d += ` L ${x} ${y - CORNER}`
-        d += ` Q ${x} ${y} ${x + dir * CORNER} ${y}`
-        d += ` L ${nextX - dir * CORNER} ${y}`
-        d += ` Q ${nextX} ${y} ${nextX} ${y + CORNER}`
+        const [, prevBottom] = positions[positions.length - 1]
+        const prevX = lineOffset(entries[i - 1].depth) + 0.5
+        d += ` C ${prevX} ${top - 4} ${x} ${prevBottom + 4} ${x} ${top} L${x} ${bottom}`
       }
+
+      positions.push([top, bottom])
     }
 
-    setGeo({ path: d, spans, height: spans[spans.length - 1].bottom })
+    if (positions.length === 0) return
+
+    // Walk the path to find how far along it each item sits, so the dot can
+    // ride the curve via CSS offset-path.
+    const probe = document.createElementNS("http://www.w3.org/2000/svg", "path")
+    probe.setAttribute("d", d)
+    const total = probe.getTotalLength()
+    const lengths: Array<[number, number]> = []
+    for (let i = 0; i < positions.length; i++) {
+      const [top, bottom] = positions[i]
+      let l = i > 0 ? lengths[i - 1][1] + (top - positions[i - 1][1]) : top
+      while (l < total && probe.getPointAtLength(l).y < top) l++
+      lengths.push([l, l + bottom - top])
+    }
+
+    setComputed({ d, width, height, positions, lengths })
   }, [entries])
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
     measure()
-    const list = listRef.current
-    if (!list || typeof ResizeObserver === "undefined") return
+    if (typeof ResizeObserver === "undefined") return
     const ro = new ResizeObserver(measure)
-    ro.observe(list)
+    ro.observe(container)
     return () => ro.disconnect()
   }, [measure])
 
-  // Scroll-spy: the last heading whose top has passed the reading line.
+  // Scroll-spy: last heading whose top has passed the reading line.
   useEffect(() => {
     if (entries.length === 0) return
     const compute = () => {
@@ -99,8 +132,8 @@ export default function TableOfContents({ entries }: TableOfContentsProps) {
 
   if (entries.length < 2) return null
 
-  const activeSpan = geo?.spans[activeIndex]
-  const activeX = RAIL_X[entries[activeIndex].depth]
+  const span = computed?.positions[activeIndex]
+  const dotAt = computed?.lengths[activeIndex]?.[1]
 
   return (
     <nav aria-label="Table of contents" className="text-sm" data-no-letter>
@@ -109,70 +142,81 @@ export default function TableOfContents({ entries }: TableOfContentsProps) {
         On this page
       </p>
 
-      <div className="relative mt-4">
-        {/* Rail. Sits behind the links and is purely decorative. */}
-        {geo && (
-          <svg
-            className="pointer-events-none absolute top-0 left-0 overflow-visible"
-            width={RAIL_X[3] + 2}
-            height={geo.height}
-            aria-hidden
+      <div ref={containerRef} className="relative mt-4 flex flex-col">
+        {computed && (
+          <div
+            className="pointer-events-none absolute top-0 left-0"
+            style={{ width: computed.width, height: computed.height }}
           >
-            <path
-              d={geo.path}
-              fill="none"
-              strokeWidth="1.5"
-              className="stroke-zinc-200 dark:stroke-zinc-700"
-            />
-            {activeSpan && (
-              <>
-                <line
-                  x1={activeX}
-                  y1={activeSpan.top}
-                  x2={activeX}
-                  y2={activeSpan.bottom}
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  className="stroke-zinc-900 transition-all duration-300 ease-out dark:stroke-white"
-                />
-                <circle
-                  cx={activeX}
-                  cy={activeSpan.bottom}
-                  r="2.5"
-                  className="fill-zinc-900 transition-all duration-300 ease-out dark:fill-white"
-                />
-              </>
+            {/* Full rail, muted. */}
+            <svg
+              width={computed.width}
+              height={computed.height}
+              viewBox={`0 0 ${computed.width} ${computed.height}`}
+              className="absolute inset-0"
+              aria-hidden
+            >
+              <path
+                d={computed.d}
+                fill="none"
+                strokeWidth="1"
+                className="stroke-zinc-200 dark:stroke-zinc-700"
+              />
+            </svg>
+
+            {/* Same path, clipped to the active range — so the highlight
+                follows the curve rather than cutting across it. */}
+            <svg
+              width={computed.width}
+              height={computed.height}
+              viewBox={`0 0 ${computed.width} ${computed.height}`}
+              className="absolute inset-0 transition-[clip-path] duration-300 ease-out"
+              style={{
+                clipPath: span
+                  ? `polygon(0 ${span[0]}px, 100% ${span[0]}px, 100% ${span[1]}px, 0 ${span[1]}px)`
+                  : "polygon(0 0, 100% 0, 100% 0, 0 0)",
+              }}
+              aria-hidden
+            >
+              <path
+                d={computed.d}
+                fill="none"
+                strokeWidth="1.5"
+                className="stroke-zinc-900 dark:stroke-white"
+              />
+            </svg>
+
+            {/* Dot rides the path itself via offset-path. */}
+            {dotAt !== undefined && (
+              <div
+                className="absolute top-0 left-0 size-1.5 rounded-full bg-zinc-900 transition-[offset-distance] duration-300 ease-out dark:bg-white"
+                style={{
+                  offsetPath: `path("${computed.d.trim()}")`,
+                  offsetDistance: `${dotAt}px`,
+                }}
+              />
             )}
-          </svg>
+          </div>
         )}
 
-        <ul ref={listRef} className="space-y-2">
-          {entries.map((entry, i) => {
-            const active = i === activeIndex
-            return (
-              <li
-                key={entry.id}
-                ref={(el) => {
-                  itemRefs.current[i] = el
-                }}
-              >
-                <a
-                  href={`#${entry.id}`}
-                  aria-current={active ? "location" : undefined}
-                  className={cn(
-                    "block leading-snug transition-colors",
-                    entry.depth === 3 ? "pl-7 text-[13px]" : "pl-4",
-                    active
-                      ? "text-zinc-900 dark:text-white"
-                      : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-                  )}
-                >
-                  {entry.text}
-                </a>
-              </li>
-            )
-          })}
-        </ul>
+        {entries.map((entry, i) => (
+          <a
+            key={entry.id}
+            href={`#${entry.id}`}
+            data-active={i === activeIndex}
+            aria-current={i === activeIndex ? "location" : undefined}
+            style={{ paddingInlineStart: itemOffset(entry.depth) }}
+            className={cn(
+              "relative py-1.5 leading-snug transition-colors",
+              entry.depth === 3 && "text-[13px]",
+              i === activeIndex
+                ? "text-zinc-900 dark:text-white"
+                : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+            )}
+          >
+            {entry.text}
+          </a>
+        ))}
       </div>
     </nav>
   )
