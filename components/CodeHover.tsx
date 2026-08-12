@@ -842,7 +842,7 @@ export default function CodeHover({
       label: "Postman",
       tokens: [
         { t: "GET", c: "text-purple-400" },
-        { t: " https://aditya-garud.me/api/hi\n", c: "text-sky-300" },
+        { t: " https://adityagarud.com/api/hi\n", c: "text-sky-300" },
         { t: "200 OK · 42 ms\n", c: "text-zinc-500" },
         { t: "{ \"msg\": ", c: "text-zinc-300" },
         { t: "\"hey, there aditya here.\"", c: "text-amber-300" },

@@ -6,9 +6,23 @@ import { ThemeProvider } from "./theme-provider"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { projects } from "@/lib/projects"
+import { SITE_URL } from "@/lib/site"
+
+// Search-engine ownership tokens. Set these in Vercel → Settings → Environment
+// Variables, then redeploy; the meta tags only render once a value exists, so an
+// unset var can't emit content="undefined" and fail verification.
+//   NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION — Google Search Console (HTML tag method)
+//   NEXT_PUBLIC_BING_SITE_VERIFICATION   — Bing Webmaster Tools (msvalidate.01)
+const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+const bingVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+
+const verification: Metadata["verification"] = {
+  ...(googleVerification ? { google: googleVerification } : {}),
+  ...(bingVerification ? { other: { "msvalidate.01": bingVerification } } : {}),
+}
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://aditya-garud.me"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Aditya Garud - Full Stack Developer & Machine Learning Engineer",
     template: "%s | Aditya Garud",
@@ -53,7 +67,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://aditya-garud.me",
+    url: SITE_URL,
     siteName: "Aditya Garud Portfolio",
     title: "Aditya Garud - Full Stack Developer & Machine Learning Engineer",
     description:
@@ -87,7 +101,7 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   alternates: {
-    canonical: "https://aditya-garud.me",
+    canonical: SITE_URL,
   },
   formatDetection: {
     email: false,
@@ -97,6 +111,7 @@ export const metadata: Metadata = {
   applicationName: "Aditya Garud Portfolio",
   referrer: "origin-when-cross-origin",
   category: "technology",
+  ...(Object.keys(verification).length > 0 ? { verification } : {}),
 }
 
 export function generateViewport(): Viewport {
@@ -118,11 +133,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const personJsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
-    "@id": "https://aditya-garud.me/#person",
+    "@id": `${SITE_URL}/#person`,
     name: "Aditya Garud",
     givenName: "Aditya",
     familyName: "Garud",
-    url: "https://aditya-garud.me",
+    url: SITE_URL,
     image: "https://github.com/yashranaway.png",
     email: "mailto:garudaditya079@gmail.com",
     jobTitle: "Full Stack Developer & Machine Learning Engineer",
@@ -182,25 +197,25 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": "https://aditya-garud.me/#website",
-    url: "https://aditya-garud.me",
+    "@id": `${SITE_URL}/#website`,
+    url: SITE_URL,
     name: "Aditya Garud",
     description:
       "Portfolio of Aditya Garud — Full Stack Developer and Machine Learning Engineer in Pune.",
     inLanguage: "en",
-    publisher: { "@id": "https://aditya-garud.me/#person" },
+    publisher: { "@id": `${SITE_URL}/#person` },
   }
 
   const profilePageJsonLd = {
     "@context": "https://schema.org",
     "@type": "ProfilePage",
-    "@id": "https://aditya-garud.me/#profile",
-    url: "https://aditya-garud.me",
+    "@id": `${SITE_URL}/#profile`,
+    url: SITE_URL,
     name: "Aditya Garud — Full Stack Developer & Machine Learning Engineer",
     inLanguage: "en",
-    isPartOf: { "@id": "https://aditya-garud.me/#website" },
-    about: { "@id": "https://aditya-garud.me/#person" },
-    mainEntity: { "@id": "https://aditya-garud.me/#person" },
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+    about: { "@id": `${SITE_URL}/#person` },
+    mainEntity: { "@id": `${SITE_URL}/#person` },
   }
 
   const projectsJsonLd = {
@@ -218,7 +233,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         description: p.description,
         ...(p.repo ? { codeRepository: p.repo, url: p.repo } : {}),
         programmingLanguage: p.stack.map((t) => t.name),
-        author: { "@id": "https://aditya-garud.me/#person" },
+        author: { "@id": `${SITE_URL}/#person` },
       },
     })),
   }
