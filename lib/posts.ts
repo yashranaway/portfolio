@@ -21,6 +21,9 @@ export interface PostMeta {
   draft: boolean
   /** Estimated read time in minutes, derived from word count. */
   readingMinutes: number
+  /** Optional hero image under /public. Also overrides the generated OG card. */
+  image?: string
+  imageAlt?: string
 }
 
 const WORDS_PER_MINUTE = 200
@@ -43,6 +46,8 @@ function parse(slug: string): PostMeta | null {
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
     draft: Boolean(data.draft),
     readingMinutes: readingMinutes(content),
+    ...(data.image ? { image: String(data.image) } : {}),
+    ...(data.imageAlt ? { imageAlt: String(data.imageAlt) } : {}),
   }
 }
 

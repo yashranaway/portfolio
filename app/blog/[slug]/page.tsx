@@ -23,6 +23,10 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   if (!post) return {}
 
   const url = `${SITE_URL}/blog/${post.slug}`
+  // Prefer a dedicated -og variant (1200x630) when one sits beside the hero.
+  const ogImage = post.image
+    ? `${SITE_URL}${post.image.replace(/\.png$/, "-og.png")}`
+    : undefined
   return {
     title: post.title,
     description: post.description,
@@ -35,11 +39,14 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       publishedTime: post.date,
       authors: ["Aditya Garud"],
       tags: post.tags,
+      // A frontmatter image wins over the generated card in opengraph-image.tsx.
+      ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630 }] } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
+      ...(ogImage ? { images: [ogImage] } : {}),
     },
   }
 }
@@ -140,6 +147,16 @@ export default async function PostPage({ params }: PostPageProps) {
                   ))}
                 </ul>
               </details>
+            )}
+
+            {post.image && (
+              <img
+                src={post.image}
+                alt={post.imageAlt ?? ""}
+                className="mt-10 w-full rounded-lg border border-zinc-200 dark:border-zinc-700"
+                width={1600}
+                height={900}
+              />
             )}
 
             <article
