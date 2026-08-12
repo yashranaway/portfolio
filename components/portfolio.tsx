@@ -119,6 +119,21 @@ const skills: Skill[] = [
   { name: "Discord Bot Dev", iconUrl: "https://skillicons.dev/icons?i=discord", lang: "discord" },
   { name: "Discord.js", iconUrl: "https://skillicons.dev/icons?i=discordjs", lang: "discordjs" },
   { name: "Discord.py", iconUrl: "/icons/discordpy.png", lang: "discordpy" },
+  { name: "TanStack", iconUrl: "https://github.com/TanStack.png?size=128", lang: "tanstack" },
+  { name: "Cloudflare", iconUrl: "https://skillicons.dev/icons?i=cloudflare", lang: "cloudflare" },
+  { name: "Bun", iconUrl: "https://skillicons.dev/icons?i=bun", lang: "bun" },
+  { name: "Vite", iconUrl: "https://skillicons.dev/icons?i=vite", lang: "vite" },
+  { name: "Svelte", iconUrl: "https://skillicons.dev/icons?i=svelte", lang: "svelte" },
+  { name: "Astro", iconUrl: "https://skillicons.dev/icons?i=astro", lang: "astro" },
+  { name: "GraphQL", iconUrl: "https://skillicons.dev/icons?i=graphql", lang: "graphql" },
+  { name: "FastAPI", iconUrl: "https://skillicons.dev/icons?i=fastapi", lang: "fastapi" },
+  { name: "Supabase", iconUrl: "https://skillicons.dev/icons?i=supabase", lang: "supabase" },
+  { name: "Redis", iconUrl: "https://skillicons.dev/icons?i=redis", lang: "redis" },
+  { name: "Kubernetes", iconUrl: "https://skillicons.dev/icons?i=kubernetes", lang: "kubernetes" },
+  { name: "Nginx", iconUrl: "https://skillicons.dev/icons?i=nginx", lang: "nginx" },
+  { name: "Deno", iconUrl: "https://skillicons.dev/icons?i=deno", lang: "deno" },
+  { name: "Three.js", iconUrl: "https://skillicons.dev/icons?i=threejs", lang: "threejs" },
+  { name: "Postman", iconUrl: "https://skillicons.dev/icons?i=postman", lang: "postman" },
 ]
 
 // Open Source contributions (curated, merged-only)
@@ -768,7 +783,7 @@ export function Portfolio({ contributions }: PortfolioProps) {
           <Marquee>
             <MarqueeFade side="left" />
             <MarqueeFade side="right" />
-            <MarqueeContent speed={60} pauseOnHover>
+            <MarqueeContent speed={150} pauseOnHover>
               {skills.map((skill) => {
                 const chip = (
                   <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
