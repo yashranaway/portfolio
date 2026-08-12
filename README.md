@@ -1,1 +1,1 @@
-[https://aditya-garud.me](https://adityagarud.com/)
+[https://adityagarud.com](https://adityagarud.com/)
