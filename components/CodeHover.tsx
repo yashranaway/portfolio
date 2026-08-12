@@ -710,7 +710,7 @@ export default function CodeHover({
         { t: "\n  ", c: "" },
         { t: "let", c: "text-purple-400" },
         { t: " msg = ", c: "text-zinc-300" },
-        { t: "\"hey, there aditya here.\"" , c: "text-amber-300" },
+        { t: "\"hey, there aditya here.\"", c: "text-amber-300" },
         { t: "\n</script>\n", c: "text-zinc-300" },
         { t: "<h1>{msg}</h1>", c: "text-emerald-400" },
       ],
