@@ -12,7 +12,13 @@ This is a test post. If you're reading it on the live site, the whole pipeline w
 
 Posts are plain `.mdx` files in `content/blog/`. Adding one is the entire publishing flow — no CMS, no build step beyond the one Next already runs.
 
+### Metadata
+
 Each post gets its own `<title>`, description, canonical URL, and Open Graph tags, plus `BlogPosting` structured data linked to the same `#person` entity the homepage declares. That last part matters: Google sees the posts and the profile as one connected thing rather than unrelated pages.
+
+### Discovery
+
+Posts and tag pages are listed in the sitemap, and the RSS feed at `/feed.xml` carries every post. Both derive from the same directory read, so they can't drift out of sync with what's published.
 
 ## Code blocks
 
