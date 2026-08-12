@@ -2,6 +2,7 @@ import type { MDXComponents } from "mdx/types"
 
 import Callout from "@/components/mdx/Callout"
 import Figure from "@/components/mdx/Figure"
+import Mermaid from "@/components/mdx/Mermaid"
 
 // Next.js picks this file up automatically for the MDX component mapping.
 // Prose styling comes from @tailwindcss/typography on the wrapping <article>;
@@ -11,6 +12,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     // Available in any .mdx file without importing them.
     Callout,
     Figure,
+    Mermaid,
     a: ({ href = "", children, ...props }) => {
       const external = /^https?:\/\//.test(href)
       return (

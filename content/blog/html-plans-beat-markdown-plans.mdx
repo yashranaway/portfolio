@@ -1,77 +1,65 @@
 ---
-title: "HTML plans beat Markdown plans"
-description: "Markdown checklists are the default format for agent plans. Structured HTML holds state that a checkbox can't."
+title: "I stopped writing plans in Markdown"
+description: "A Markdown checkbox holds one bit of state. A feature plan needs more than that, so I moved my planning output to a single HTML file."
 date: "2026-08-12"
 tags: ["agents", "tooling"]
 draft: true
 ---
 
-{/*
-  SCAFFOLD — replace this comment as you write.
+Every plan I wrote in Markdown had the same fate. I read it once while it was being written, skimmed it later, and nobody else on the team opened it at all.
 
-  Everything below is structure and prompts, not claims. I have deliberately
-  not written the argument for you: the post is only worth reading if the
-  opinions and the war stories are yours. Delete any heading that doesn't earn
-  its place, and flip `draft: false` in the frontmatter when you're ready to
-  publish.
-*/}
+The format was the problem. A Markdown task carries one bit: done, or not done. A real feature plan needs to carry a mockup, an API shape, three states nobody thought about, and the reason the second approach was rejected.
 
-Most agent harnesses write plans as Markdown checklists. It's the obvious choice — it's what models emit naturally and what humans read without thinking. It's also the reason plans go stale halfway through a long task.
+## The difference is who reads it
 
-{/* TODO: open with the concrete moment this bit you. A specific run, a
-    specific plan that drifted, what it cost. One paragraph, no hedging. */}
+{/* Subgraphs render right to left, so HTML is declared first to put
+    Markdown on the left. flowchart TB with inner TB is what lays them out
+    as two columns; LR stacks them into one very wide row. */}
+<Mermaid caption="Same plan, two formats, two very different review loops." chart={`
+flowchart TB
+  subgraph HT[HTML plan]
+    direction TB
+    H1[Agent writes plan.html] --> H2[Open in browser]
+    H2 --> H3[Designer and PM read it]
+    H3 --> H4[Drift found before code]
+  end
+  subgraph MD[Markdown plan]
+    direction TB
+    M1[Agent writes plan.md] --> M2[You skim it]
+    M2 --> M3[Team never opens it]
+    M3 --> M4[Drift found in review]
+  end
+`} />
 
-## What a checkbox can actually encode
+Markdown moves review to the end, where it is expensive. HTML moves it to the front, where it is cheap.
 
-A Markdown task is one bit of state:
+## What each format can actually hold
 
-```md
-- [ ] Migrate payouts to Inertia
-- [x] Add sendgrid resend fallback
-```
+| A plan needs to show | Markdown | Single HTML file |
+| --- | --- | --- |
+| Task done or not done | Checkbox | Checkbox |
+| Blocked, and blocked on what | Prose beside the box | Attribute you can query |
+| What the screen looks like | Link to Figma, if it exists | Real mockup, styled with the product's own CSS |
+| Loading, error, empty, permission states | A bullet each, usually skipped | A button per state |
+| Two competing approaches | Two sections, read in sequence | Side by side, or a toggle |
+| API and data flow | ASCII art | An actual diagram |
+| Which repo the work lands in | A heading | A labelled map |
+| Read by a non engineer | Rarely | Open the file |
 
-Done, or not done. Everything else a running task needs — who owns it, what it's blocked on, why it was abandoned, which attempt this is — has to live in prose beside the box, where nothing can read it reliably.
+None of this is exotic. It is one file, opened in a browser, with no build step.
 
-{/* TODO: name the states you actually needed that `[ ]` and `[x]` couldn't hold. */}
+## The prompt I use
 
-## The same plan as structure
+The whole thing is a single instruction: produce one self contained HTML file, reuse the product's existing UI as the visual source of truth, keep alternatives on the same page behind a toggle, and prefer mockups and diagrams over paragraphs.
 
-```html
-<task id="payouts-inertia" status="blocked" blocked-by="auth-refactor">
-  <title>Migrate payouts to Inertia</title>
-  <note>Waiting on the session shape to settle.</note>
-</task>
-```
+<Callout type="tip" title="The rule that does the most work">
+  Treat the current frontend as the visual source of truth. Not a template, not a fresh design language. If the plan does not look like the product, nobody trusts what it is proposing.
+</Callout>
 
-{/* TODO: this is the crux — make the argument in your own words:
-    - state lives in attributes, not in prose an agent has to re-read
-    - ids are stable identity, so reordering doesn't break references
-    - it's queryable: "give me every blocked task" is a selector, not a regex
-    - a single node can be rewritten without touching the rest of the document
-*/}
+The rest is a checklist: every requested feature represented, backend and cross repo work included even when it is invisible in the UI, assumptions clearly separated from confirmed behaviour, and every demo button actually working.
 
-## Where it gets expensive
+## When Markdown still wins
 
-{/* TODO: this section is what separates the post from an advert. Address the
-    real costs honestly, or readers will assume you haven't hit them:
-    - tokens. HTML is verbose, and the plan sits in context on every turn
-    - humans read and hand-edit these files; is the tradeoff worth it?
-    - models emit Markdown natively; what does it take to get clean HTML out?
-    - git diffs on nested markup versus one-line checkbox changes
-*/}
+Short plans. Three tasks and a decision, read once by one person, done by lunch. Reaching for HTML there is ceremony.
 
-## What I'd actually use
-
-{/* TODO: land somewhere specific. Always HTML? Only past a certain plan size?
-    A hybrid — Markdown for the human view, HTML as the machine-readable
-    source? Give the reader a rule they can apply on Monday. */}
-
-{/*
-  Components available in any post, no import needed:
-
-  <Callout type="note">Types: note, tip, warning, danger. Optional `title`.</Callout>
-  <Figure src="/blog/plan-diff.png" alt="..." caption="..." />
-  <Figure caption="..."><AnyComponent /></Figure>
-
-  Headings: ## and ### appear in the table of contents automatically.
-*/}
+The switch pays off at the size where a plan stops being a list and starts being a document that somebody else has to agree with.
