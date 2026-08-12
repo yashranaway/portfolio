@@ -31,6 +31,26 @@ export function getPosts(): PostMeta[] {
 
 Inline `code` works too, as do **bold**, *italics*, and [links](https://adityagarud.com).
 
+## Callouts and figures
+
+MDX's real advantage over plain markdown is that components work inside prose. Two are available in every post without importing anything:
+
+<Callout type="note">
+  A plain note. Types are `note`, `tip`, `warning`, and `danger`, and each takes an optional `title`.
+</Callout>
+
+<Callout type="warning" title="Turbopack gotcha">
+  MDX plugins must be named as strings, not imported functions — Turbopack requires serializable loader options.
+</Callout>
+
+Figures wrap an image or any component with a caption:
+
+<Figure caption="A figure can wrap arbitrary content, not just images — charts and tables work too.">
+  <div style={{ padding: "2.5rem", textAlign: "center", fontFamily: "ui-monospace, monospace", fontSize: "0.8rem", opacity: 0.6 }}>
+    [ chart goes here ]
+  </div>
+</Figure>
+
 ## Lists and quotes
 
 - GitHub-flavoured markdown is on, so tables and task lists work

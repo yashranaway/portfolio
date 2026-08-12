@@ -18,6 +18,8 @@ import { HoverHighlightCard } from "@/components/ui/card-hover-effect"
 import { Marquee, MarqueeContent, MarqueeFade, MarqueeItem } from "@/components/ui/marquee"
 import { projects as projectsData } from "@/lib/projects"
 import type { Contribution } from "@/lib/github"
+import { formatDate } from "@/lib/format"
+import type { PostMeta } from "@/lib/posts"
 import { getCalApi } from "@calcom/embed-react"
 import dynamic from "next/dynamic"
 import type { ContribChartDatum } from "@/components/ContribAreaChart"
@@ -307,9 +309,11 @@ const openSourceTotals = {
 
 interface PortfolioProps {
   contributions: Contribution[]
+  /** Newest few posts, read server-side in app/page.tsx. */
+  posts: PostMeta[]
 }
 
-export function Portfolio({ contributions }: PortfolioProps) {
+export function Portfolio({ contributions, posts }: PortfolioProps) {
   const { theme } = useTheme()
   const [scrollProgress, setScrollProgress] = useState<number>(0)
   const [showResume, setShowResume] = useState<boolean>(false)
@@ -1014,6 +1018,56 @@ export function Portfolio({ contributions }: PortfolioProps) {
             ))}
           </div>
         </section>
+
+        {/* Writing — hidden entirely until there is something to show. */}
+        {posts.length > 0 && (
+          <section
+            className="space-y-6 sm:space-y-8 animate-fade-in-up"
+            style={{ animationDelay: "0.7s" }}
+            data-no-letter
+          >
+            <div className="flex items-baseline justify-between gap-4 flex-wrap">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-zinc-900 dark:text-white">
+                Writing
+              </h2>
+              <Link
+                href="/blog"
+                className="group inline-flex items-center gap-1 font-mono text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+              >
+                <span>all posts</span>
+                <ArrowUpRight className="w-3 h-3 opacity-60 transition-all group-hover:opacity-100 group-hover:-translate-y-px group-hover:translate-x-px" />
+              </Link>
+            </div>
+
+            <ul className="divide-y divide-zinc-200 dark:divide-zinc-700 border-y border-zinc-200 dark:border-zinc-700">
+              {posts.map((post) => (
+                <li key={post.slug}>
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="group flex items-baseline justify-between gap-4 py-4 flex-wrap"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm sm:text-base font-medium text-zinc-900 dark:text-white group-hover:underline underline-offset-4">
+                        {post.title}
+                      </h3>
+                      {post.description && (
+                        <p className="mt-1 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                          {post.description}
+                        </p>
+                      )}
+                    </div>
+                    <time
+                      dateTime={post.date}
+                      className="font-mono text-[11px] text-zinc-500 tabular-nums flex-shrink-0"
+                    >
+                      {formatDate(post.date)}
+                    </time>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Contact Section */}
         <section className="space-y-8 sm:space-y-12 animate-fade-in-up" style={{ animationDelay: "0.8s" }}>

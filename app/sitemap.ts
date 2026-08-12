@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next"
 
-import { getPosts } from "@/lib/posts"
+import { getPosts, getTags } from "@/lib/posts"
 import { SITE_URL } from "@/lib/site"
 
 // Bump this when the homepage content meaningfully changes.
@@ -32,6 +32,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: post.date,
       changeFrequency: "yearly" as const,
       priority: 0.7,
+    })),
+    // Tag pages are thin by nature, so they sit below posts in priority.
+    ...getTags().map(({ slug }) => ({
+      url: `${SITE_URL}/blog/tags/${slug}`,
+      lastModified: posts[0]?.date ?? LAST_CONTENT_UPDATE,
+      changeFrequency: "weekly" as const,
+      priority: 0.4,
     })),
   ]
 }

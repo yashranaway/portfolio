@@ -3,6 +3,8 @@ import path from "node:path"
 
 import matter from "gray-matter"
 
+import { formatDate, tagSlug } from "@/lib/format"
+
 // Posts are plain .mdx files in content/blog/. No content framework: at this
 // scale a directory read plus gray-matter does everything Contentlayer/Velite
 // would, without a build step. Revisit if this grows past ~100 posts.
@@ -64,11 +66,27 @@ export function getPost(slug: string): PostMeta | null {
   return post
 }
 
-export function formatDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  })
+export interface TagCount {
+  tag: string
+  /** URL-safe form used in /blog/tags/[tag]. */
+  slug: string
+  count: number
 }
+
+/** Every tag in use, most-used first, then alphabetical. */
+export function getTags(): TagCount[] {
+  const counts = new Map<string, number>()
+  for (const post of getPosts()) {
+    for (const tag of post.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
+  }
+  return [...counts.entries()]
+    .map(([tag, count]) => ({ tag, slug: tagSlug(tag), count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
+}
+
+export function getPostsByTag(slug: string): PostMeta[] {
+  return getPosts().filter((post) => post.tags.some((t) => tagSlug(t) === slug))
+}
+
+// Re-exported so server modules can keep importing from one place.
+export { formatDate, tagSlug }

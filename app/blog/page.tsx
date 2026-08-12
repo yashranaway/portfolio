@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 
-import { getPosts, formatDate } from "@/lib/posts"
+import PostList from "@/components/PostList"
+import { getPosts, getTags } from "@/lib/posts"
 import { SITE_URL } from "@/lib/site"
 
 export const metadata: Metadata = {
@@ -20,59 +21,46 @@ export const metadata: Metadata = {
 
 export default function BlogIndex() {
   const posts = getPosts()
+  const tags = getTags()
 
   return (
-    <main className="min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-white">
-      <div className="container mx-auto max-w-3xl px-4 sm:px-6 py-12 sm:py-20">
+    <main className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-900 dark:text-white">
+      <div className="container mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
         <Link
           href="/"
-          className="font-mono text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+          className="font-mono text-xs text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white"
         >
           ← back
         </Link>
 
-        <h1 className="mt-6 text-3xl sm:text-4xl font-light">Blog</h1>
-        <p className="mt-3 text-sm sm:text-base text-zinc-600 dark:text-zinc-400">
+        <h1 className="mt-6 text-3xl font-light sm:text-4xl">Blog</h1>
+        <p className="mt-3 text-sm text-zinc-600 sm:text-base dark:text-zinc-400">
           Machine learning, agents, and things I probably shouldn&apos;t have shipped.
         </p>
 
-        {posts.length === 0 ? (
-          <p className="mt-12 font-mono text-sm text-zinc-500">No posts yet.</p>
-        ) : (
-          <ul className="mt-10 sm:mt-12 space-y-8">
-            {posts.map((post) => (
-              <li key={post.slug}>
-                <article>
-                  <Link href={`/blog/${post.slug}`} className="group block">
-                    <div className="flex items-baseline justify-between gap-4 flex-wrap">
-                      <h2 className="text-lg sm:text-xl font-medium group-hover:underline underline-offset-4">
-                        {post.title}
-                      </h2>
-                      <time
-                        dateTime={post.date}
-                        className="font-mono text-xs text-zinc-500 tabular-nums flex-shrink-0"
-                      >
-                        {formatDate(post.date)}
-                      </time>
-                    </div>
-                    {post.description && (
-                      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                        {post.description}
-                      </p>
-                    )}
-                    <div className="mt-2 flex items-center gap-3 font-mono text-[11px] text-zinc-500">
-                      <span>{post.readingMinutes} min read</span>
-                      {post.draft && (
-                        <span className="text-amber-500">draft</span>
-                      )}
-                      {post.tags.length > 0 && <span>{post.tags.join(" · ")}</span>}
-                    </div>
-                  </Link>
-                </article>
+        {tags.length > 0 && (
+          <ul className="mt-6 flex flex-wrap gap-2">
+            {tags.map(({ tag, slug, count }) => (
+              <li key={slug}>
+                <Link
+                  href={`/blog/tags/${slug}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 px-3 py-1 font-mono text-[11px] text-zinc-600 transition-colors hover:border-zinc-300 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-white"
+                >
+                  <span>#{tag}</span>
+                  <span className="text-zinc-400 tabular-nums dark:text-zinc-500">{count}</span>
+                </Link>
               </li>
             ))}
           </ul>
         )}
+
+        <PostList posts={posts} />
+
+        <p className="mt-16 border-t border-zinc-200 pt-6 font-mono text-xs text-zinc-500 dark:border-zinc-700">
+          <a href="/feed.xml" className="hover:text-zinc-900 dark:hover:text-white">
+            RSS feed →
+          </a>
+        </p>
       </div>
     </main>
   )

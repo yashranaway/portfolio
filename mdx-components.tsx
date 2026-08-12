@@ -1,10 +1,16 @@
 import type { MDXComponents } from "mdx/types"
 
+import Callout from "@/components/mdx/Callout"
+import Figure from "@/components/mdx/Figure"
+
 // Next.js picks this file up automatically for the MDX component mapping.
 // Prose styling comes from @tailwindcss/typography on the wrapping <article>;
 // these overrides only handle what typography can't infer.
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
+    // Available in any .mdx file without importing them.
+    Callout,
+    Figure,
     a: ({ href = "", children, ...props }) => {
       const external = /^https?:\/\//.test(href)
       return (
