@@ -1,0 +1,44 @@
+---
+title: "Hello, world"
+description: "A test post to confirm the blog pipeline works — MDX, code highlighting, metadata, and feeds."
+date: "2026-08-12"
+tags: ["meta"]
+draft: false
+---
+
+This is a test post. If you're reading it on the live site, the whole pipeline works: MDX compiles, Shiki highlights, the sitemap lists it, and the RSS feed carries it.
+
+## What's wired up
+
+Posts are plain `.mdx` files in `content/blog/`. Adding one is the entire publishing flow — no CMS, no build step beyond the one Next already runs.
+
+Each post gets its own `<title>`, description, canonical URL, and Open Graph tags, plus `BlogPosting` structured data linked to the same `#person` entity the homepage declares. That last part matters: Google sees the posts and the profile as one connected thing rather than unrelated pages.
+
+## Code blocks
+
+Syntax highlighting runs through Shiki — the same engine VS Code uses — so it renders at build time with no client-side JavaScript:
+
+```ts
+export function getPosts(): PostMeta[] {
+  return fs
+    .readdirSync(POSTS_DIR)
+    .filter((f) => f.endsWith(".mdx"))
+    .map((f) => parse(f.replace(/\.mdx$/, "")))
+    .filter((p): p is PostMeta => p !== null)
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+}
+```
+
+Inline `code` works too, as do **bold**, *italics*, and [links](https://adityagarud.com).
+
+## Lists and quotes
+
+- GitHub-flavoured markdown is on, so tables and task lists work
+- Reading time is derived from word count, not stored in frontmatter
+- Drafts (`draft: true`) show in dev and are hidden in production
+
+> The blog exists mostly to turn one indexable page into many. That was the real ceiling.
+
+## Writing a real post
+
+Create `content/blog/your-slug.mdx`, give it `title`, `description`, and `date` in the frontmatter, and it appears at `/blog/your-slug`. Set `draft: true` while you work on it — it'll render locally and stay off the live site until you flip it.

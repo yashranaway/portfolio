@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Tailwind v4 loads plugins from CSS — there is no tailwind.config.ts here. */
+@plugin '@tailwindcss/typography';
+
 @custom-variant dark (&:is(.dark *));
 
 @utility container {
