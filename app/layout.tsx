@@ -90,14 +90,18 @@ export const metadata: Metadata = {
     site: "@yashranaway",
     images: ["/og-image.png"],
   },
+  // Each entry points at a file that is actually that size. Previously every
+  // slot served the same 736x736 / 192 KB PNG with invented `sizes` values, so
+  // browsers downloaded 192 KB to paint a 16px tab icon.
   icons: {
     icon: [
-      { url: "/favicon.png", type: "image/png" },
-      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
     ],
-    apple: "/favicon.png",
-    shortcut: "/favicon.png",
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    shortcut: "/favicon.ico",
   },
   manifest: "/site.webmanifest",
   alternates: {
