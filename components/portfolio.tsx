@@ -5,6 +5,7 @@ import { Heart, Download, X, GitMerge, ChevronRight, ArrowUpRight } from "lucide
 import { FaXTwitter, FaGithub } from "react-icons/fa6"
 import { useState, useEffect, useMemo, useRef } from "react"
 import { createPortal } from "react-dom"
+import Link from "next/link"
 
 import { ModeToggle } from "@/components/mode-toggle"
 import ClickSpark from "@/components/ClickSpark"
@@ -547,9 +548,19 @@ export function Portfolio({ contributions }: PortfolioProps) {
       extraScale={1.0}
     >
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-white relative transition-colors duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]">
-      {/* Header */}
+      {/* Header — toggle stays optically centred, so nav is absolutely placed. */}
       <header className="container mx-auto px-4 py-4 sm:py-6 flex justify-center items-center animate-fade-in relative z-50">
         <ModeToggle />
+        <nav className="absolute right-4 sm:right-6 md:right-8">
+          <Link
+            href="/blog"
+            className="group relative inline-block font-mono text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+            data-no-letter
+          >
+            <span>blog</span>
+            <span className="absolute bottom-0 left-0 h-px w-0 bg-zinc-400 transition-all duration-300 ease-out group-hover:w-full dark:bg-zinc-500" />
+          </Link>
+        </nav>
       </header>
 
       {/* Main Content */}

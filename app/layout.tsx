@@ -106,6 +106,10 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
   alternates: {
     canonical: SITE_URL,
+    // Lets feed readers auto-discover the blog from any page.
+    types: {
+      "application/rss+xml": [{ url: `${SITE_URL}/feed.xml`, title: "Aditya Garud — Blog" }],
+    },
   },
   formatDetection: {
     email: false,
