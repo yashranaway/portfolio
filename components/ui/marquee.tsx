@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils"
 export type MarqueeProps = HTMLAttributes<HTMLDivElement>
 
 export const Marquee = ({ className, ...props }: MarqueeProps) => (
-  <div className={cn("group relative w-full overflow-hidden", className)} {...props} />
+  <div className={cn("marquee-root group relative w-full overflow-hidden", className)} {...props} />
 )
 
 export type MarqueeContentProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
@@ -45,7 +45,9 @@ export const MarqueeContent = ({
   <div
     className={cn(
       "flex w-max animate-marquee",
-      pauseOnHover && "group-hover:[animation-play-state:paused]",
+      // .marquee-track is paused by a rule in globals.css; group-hover is kept
+      // as a belt-and-braces fallback.
+      pauseOnHover && "marquee-track group-hover:[animation-play-state:paused]",
       reverse && "[animation-direction:reverse]",
       // Respect users who've asked for less motion.
       "motion-reduce:animate-none motion-reduce:flex-wrap motion-reduce:w-full motion-reduce:justify-center",

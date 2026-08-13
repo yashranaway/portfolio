@@ -178,6 +178,16 @@
   to { transform: translateX(-50%); }
 }
 
+/* Pause on hover, stated explicitly rather than via `group-hover:`.
+   Each skill chip is wrapped by CodeHover, which declares its own `.group`,
+   and nested groups are where that variant gets unreliable. A plain
+   descendant selector has no such ambiguity. focus-within covers keyboard
+   users, who got nothing from the hover-only version. */
+.marquee-root:hover .marquee-track,
+.marquee-root:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
