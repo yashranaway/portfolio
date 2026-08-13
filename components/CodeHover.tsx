@@ -28,6 +28,9 @@ interface PosStyle {
   left: number
 }
 
+// Shared across instances: how many popups are currently open.
+let openPopupCount = 0
+
 // Generic hover code popover with typing and output for multiple languages
 export default function CodeHover({
   children,
@@ -920,6 +923,23 @@ export default function CodeHover({
       setHovering(next)
     }
   }
+
+  // Flag the document while a snippet is open so the skills marquee can hold
+  // still under the popup. Hover CSS alone can't do this on touch, where the
+  // popup opens on tap rather than hover.
+  useEffect(() => {
+    if (!hovering) return
+    openPopupCount += 1
+    document.documentElement.setAttribute("data-codehover-open", "")
+    return () => {
+      openPopupCount = Math.max(0, openPopupCount - 1)
+      // Counted rather than a plain toggle: two instances can briefly overlap
+      // while one is closing, and a naive remove would unpause too early.
+      if (openPopupCount === 0) {
+        document.documentElement.removeAttribute("data-codehover-open")
+      }
+    }
+  }, [hovering])
 
   // Close this instance when another opens
   useEffect(() => {

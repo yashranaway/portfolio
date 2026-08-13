@@ -180,11 +180,25 @@
 
 /* Pause on hover, stated explicitly rather than via `group-hover:`.
    Each skill chip is wrapped by CodeHover, which declares its own `.group`,
-   and nested groups are where that variant gets unreliable. A plain
-   descendant selector has no such ambiguity. focus-within covers keyboard
-   users, who got nothing from the hover-only version. */
-.marquee-root:hover .marquee-track,
+   and nested groups are where that variant gets unreliable.
+
+   Gated behind (hover: hover): touch browsers emulate hover on first tap, so
+   an ungated rule costs a tap — one to trigger the fake hover, another to
+   actually open the snippet. */
+@media (hover: hover) {
+  .marquee-root:hover .marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+/* Keyboard users, who got nothing from the hover-only version. */
 .marquee-root:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Covers touch: CodeHover flags the document while a snippet is open, so the
+   row holds still under the popup regardless of input type. */
+html[data-codehover-open] .marquee-track {
   animation-play-state: paused;
 }
 
