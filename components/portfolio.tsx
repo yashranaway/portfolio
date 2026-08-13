@@ -222,6 +222,27 @@ const openSourceData: OpenSourceOrg[] = [
     ],
   },
   {
+    key: "omarchy",
+    iconUrl: "https://github.com/basecamp.png?size=128",
+    label: "basecamp/omarchy",
+    merged: 3,
+    name: "Omarchy",
+    description: "Beautiful, modern and opinionated Linux, from Basecamp. Arch and Hyprland, configured out of the box.",
+    siteUrl: "https://omarchy.org",
+    accent: "#f97316",
+    repos: [
+      {
+        repo: "basecamp/omarchy",
+        merged: 3,
+        prs: [
+          { num: 6752, title: "Treat LVDS panels as internal displays" },
+          { num: 6738, title: "Stop hybrid GPU mode queries from hanging" },
+          { num: 6732, title: "Only offer video capture devices as webcams" },
+        ],
+      },
+    ],
+  },
+  {
     key: "omacom",
     iconUrl: "https://github.com/omacom-io.png?size=128",
     label: "omacom-io/ttfx (Omarchy)",
