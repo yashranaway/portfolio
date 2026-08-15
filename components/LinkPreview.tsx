@@ -107,7 +107,10 @@ export default function LinkPreview({
   return (
     <span
       ref={triggerRef}
-      className="inline-flex"
+      // min-w-0/max-w-full let a truncating child actually shrink when this
+      // sits inside a flex row; without them the trigger sizes to its content
+      // and overflows the parent.
+      className="inline-flex min-w-0 max-w-full"
       onMouseEnter={enterTrigger}
       onMouseLeave={leaveTrigger}
       data-no-letter
