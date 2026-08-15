@@ -266,7 +266,7 @@ const openSourceData: OpenSourceOrg[] = [
     key: "t3code",
     iconUrl: "https://github.com/pingdotgg.png?size=128",
     label: "pingdotgg/t3code",
-    merged: 1,
+    merged: 2,
     name: "T3 Code",
     description: "An agent harness control surface from Ping.gg. Drive Claude Code, Codex, Cursor and OpenCode from mobile, web, or desktop.",
     siteUrl: "https://t3.codes",
@@ -274,9 +274,10 @@ const openSourceData: OpenSourceOrg[] = [
     repos: [
       {
         repo: "pingdotgg/t3code",
-        merged: 1,
+        merged: 2,
         prs: [
           { num: 4468, title: "Keep block code plain when copying from rendered markdown" },
+          { num: 4466, title: "Skip user hooks during Claude capability probes" },
         ],
       },
     ],
