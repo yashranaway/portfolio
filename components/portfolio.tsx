@@ -15,7 +15,6 @@ import LinkPreview from "@/components/LinkPreview"
 import VisitorBadge from "@/components/VisitorBadge"
 import { RandomMatrix } from "@/components/ui/matrix"
 import { HoverHighlightCard } from "@/components/ui/card-hover-effect"
-import { Marquee, MarqueeContent, MarqueeFade, MarqueeItem } from "@/components/ui/marquee"
 import { projects as projectsData } from "@/lib/projects"
 import type { Contribution } from "@/lib/github"
 import { formatDate } from "@/lib/format"
@@ -80,8 +79,8 @@ interface SparkPos {
   h?: number
 }
 
-// One flat list feeding the marquee. `lang` is the CodeHover preset key —
-// previously this lived in six duplicated name→key maps inside the render.
+// One flat list. `lang` is the CodeHover preset key — previously this lived in
+// six duplicated name→key maps inside the render.
 const skills: Skill[] = [
   { name: "C", iconUrl: "https://skillicons.dev/icons?i=c", lang: "c" },
   { name: "C++", iconUrl: "https://skillicons.dev/icons?i=cpp", lang: "cpp" },
@@ -839,25 +838,25 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
             Technical Arsenal
          </h2>
 
-          <Marquee>
-            <MarqueeFade side="left" />
-            <MarqueeFade side="right" />
-            <MarqueeContent speed={150} pauseOnHover>
-              {skills.map((skill) => {
-                const chip = (
-                  <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300">
-                    <img src={skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
-                    <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white whitespace-nowrap">{skill.name}</span>
-                  </div>
-                )
-                return (
-                  <MarqueeItem key={skill.name}>
-                    {skill.lang ? <CodeHover lang={skill.lang}>{chip}</CodeHover> : chip}
-                  </MarqueeItem>
-                )
-              })}
-            </MarqueeContent>
-          </Marquee>
+          {/* Static, not a marquee. This list exists to be read, and a moving
+              row means scanning for one item is tracking a moving target.
+              Slowing it down was not enough; the Marquee components are still
+              in components/ui/marquee.tsx if this ever wants motion again. */}
+          <ul className="flex flex-wrap justify-center gap-2 sm:gap-2.5 max-w-5xl mx-auto">
+            {skills.map((skill) => {
+              const chip = (
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors duration-300">
+                  <img src={skill.iconUrl} alt="" aria-hidden className="w-4 h-4 sm:w-5 sm:h-5" loading="lazy" />
+                  <span className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-white whitespace-nowrap">{skill.name}</span>
+                </div>
+              )
+              return (
+                <li key={skill.name}>
+                  {skill.lang ? <CodeHover lang={skill.lang}>{chip}</CodeHover> : chip}
+                </li>
+              )
+            })}
+          </ul>
         </section>
 
         {/* Open Source Section */}
