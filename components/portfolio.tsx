@@ -225,7 +225,7 @@ const openSourceData: OpenSourceOrg[] = [
     key: "omarchy",
     iconUrl: "https://github.com/basecamp.png?size=128",
     label: "basecamp/omarchy",
-    merged: 3,
+    merged: 4,
     name: "Omarchy",
     description: "Beautiful, modern and opinionated Linux, from Basecamp. Arch and Hyprland, configured out of the box.",
     siteUrl: "https://omarchy.org",
@@ -233,8 +233,9 @@ const openSourceData: OpenSourceOrg[] = [
     repos: [
       {
         repo: "basecamp/omarchy",
-        merged: 3,
+        merged: 4,
         prs: [
+          { num: 6763, title: "Keep shell tests inside their fixtures" },
           { num: 6752, title: "Treat LVDS panels as internal displays" },
           { num: 6738, title: "Stop hybrid GPU mode queries from hanging" },
           { num: 6732, title: "Only offer video capture devices as webcams" },
@@ -266,7 +267,7 @@ const openSourceData: OpenSourceOrg[] = [
     key: "t3code",
     iconUrl: "https://github.com/pingdotgg.png?size=128",
     label: "pingdotgg/t3code",
-    merged: 2,
+    merged: 4,
     name: "T3 Code",
     description: "An agent harness control surface from Ping.gg. Drive Claude Code, Codex, Cursor and OpenCode from mobile, web, or desktop.",
     siteUrl: "https://t3.codes",
@@ -274,8 +275,10 @@ const openSourceData: OpenSourceOrg[] = [
     repos: [
       {
         repo: "pingdotgg/t3code",
-        merged: 2,
+        merged: 4,
         prs: [
+          { num: 4470, title: "Keep the server alive when a response write hits a dead socket" },
+          { num: 4469, title: "Limit physical key fallback to non-Latin layout output" },
           { num: 4468, title: "Keep block code plain when copying from rendered markdown" },
           { num: 4466, title: "Skip user hooks during Claude capability probes" },
         ],
