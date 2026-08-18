@@ -62,8 +62,6 @@ None of which makes it the right answer everywhere. An agent that is a real user
 
 One last thing, because it made me laugh when I found it. The Quattro screensaver picks a random effect from terminaltexteffects, which the Omarchy folks rewrote in Rust as ttfx. I sent a couple of small fixes that way, so I went and read how one of them actually works.
 
-The one below is smoke. The look does not come from the block characters, which is what I assumed. It comes from the traversal. Flood the grid directly and you get a clean expanding disc that reads as a wipe. ttfx builds a weighted spanning tree over the characters first and walks that breadth first, so the front is forced through a random branching structure and arrives in tendrils instead. Same symbols, completely different thing.
-
 <SmokeText
   caption="ttfx smoke, ported to the browser. Weighted Prim's spanning tree, walked breadth-first."
   text={`
