@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 
 // Ported from omacom-io/ttfx (src/effects/smoke.rs), itself a parity-exact Rust
 // port of terminaltexteffects' effect_smoke.py.
@@ -28,6 +28,8 @@ const SMOKE_HOLD = 3
 /** Frames spent resolving from the smoke into the settled character. */
 const PAINT_FRAMES = 5
 const SMOKE_FRAMES = SMOKE_SYMBOLS.length * SMOKE_HOLD
+/** Frames the settled text is held before the next pass. Roughly two seconds. */
+const HOLD_FRAMES = 120
 
 type RGB = [number, number, number]
 
@@ -173,8 +175,8 @@ interface SmokeTextProps {
  *   <SmokeText text={`  ...ascii...  `} caption="ttfx smoke, ported to the web." />
  *
  * The settled state is rendered directly, so this is readable with JavaScript
- * off and there is nothing to hydrate around. The animation only starts once
- * the block scrolls into view, and is skipped outright under reduced motion.
+ * off and there is nothing to hydrate around. The animation loops for as long
+ * as the block is on screen, and is skipped outright under reduced motion.
  */
 export default function SmokeText({ text, caption, maxFontSize = 14 }: SmokeTextProps) {
   // Memoized so `play` keeps a stable identity. Rebuilding the grid every
@@ -183,7 +185,6 @@ export default function SmokeText({ text, caption, maxFontSize = 14 }: SmokeText
   const spansRef = useRef<Array<HTMLSpanElement | null>>([])
   const frameRef = useRef<number | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const [running, setRunning] = useState(false)
 
   const stop = useCallback(() => {
     if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
@@ -193,24 +194,33 @@ export default function SmokeText({ text, caption, maxFontSize = 14 }: SmokeText
   const play = useCallback(() => {
     stop()
     const n = cells.length
-    const layers = bfsLayers(spanningTree(width, cells.length / width), n)
+    const height = n / width
     const smokeStops = SMOKE_STOPS.map(hexToRgb)
     const startRgb = hexToRgb(STARTING_COLOR)
 
-    const activatedAt = new Int32Array(n).fill(-1)
-    const active = new Set<number>()
-
-    // Reset to the pre-smoke state: real characters, flat gray.
-    for (let i = 0; i < n; i++) {
-      const span = spansRef.current[i]
-      if (!span) continue
-      span.textContent = cells[i].char
-      span.style.color = STARTING_COLOR
-    }
-
-    setRunning(true)
+    let layers: number[][] = []
+    let activatedAt = new Int32Array(n)
+    let active = new Set<number>()
     let frame = 0
     let layer = 0
+    let hold = 0
+
+    // A fresh tree every pass, so no two burns take the same path.
+    const seed = () => {
+      layers = bfsLayers(spanningTree(width, height), n)
+      activatedAt = new Int32Array(n).fill(-1)
+      active = new Set<number>()
+      frame = 0
+      layer = 0
+      hold = 0
+      // Back to the pre-smoke state: real characters, flat gray.
+      for (let i = 0; i < n; i++) {
+        const span = spansRef.current[i]
+        if (!span) continue
+        span.textContent = cells[i].char
+        span.style.color = STARTING_COLOR
+      }
+    }
 
     const tick = () => {
       if (layer < layers.length) {
@@ -242,22 +252,25 @@ export default function SmokeText({ text, caption, maxFontSize = 14 }: SmokeText
       }
 
       frame++
-      if (layer < layers.length || active.size > 0) {
-        frameRef.current = requestAnimationFrame(tick)
-      } else {
-        frameRef.current = null
-        setRunning(false)
+      // Settled. Let it sit and be readable, then burn it again.
+      if (layer >= layers.length && active.size === 0) {
+        hold++
+        if (hold > HOLD_FRAMES) seed()
       }
+      frameRef.current = requestAnimationFrame(tick)
     }
 
+    seed()
     frameRef.current = requestAnimationFrame(tick)
   }, [cells, width, stop])
 
   // Read through a ref so the observer effect can hold empty deps. Depending on
   // `play` directly would tear down and rebuild the observer mid-animation.
   const playRef = useRef(play)
+  const stopRef = useRef(stop)
   useEffect(() => {
     playRef.current = play
+    stopRef.current = stop
   })
 
   useEffect(() => {
@@ -265,19 +278,22 @@ export default function SmokeText({ text, caption, maxFontSize = 14 }: SmokeText
     if (!node) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
 
+    // The loop never ends on its own, so visibility drives it. Scrolled away
+    // means no reason to keep burning frames, and rAF already idles the tab.
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue
-          // Fire once. Re-entering the viewport is what the replay button is for.
-          observer.disconnect()
-          playRef.current()
+          if (entry.isIntersecting) playRef.current()
+          else stopRef.current()
         }
       },
-      { threshold: 0.35 },
+      { threshold: 0.2 },
     )
     observer.observe(node)
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      stopRef.current()
+    }
   }, [])
 
   useEffect(() => stop, [stop])
@@ -315,15 +331,6 @@ export default function SmokeText({ text, caption, maxFontSize = 14 }: SmokeText
 
         {/* The grid is decorative once it is animating, so expose the text once, plainly. */}
         <span className="sr-only">{text.trim()}</span>
-
-        <button
-          type="button"
-          onClick={play}
-          disabled={running}
-          className="absolute right-2 top-2 rounded border border-zinc-700 bg-zinc-900/80 px-2 py-1 font-mono text-[10px] text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200 disabled:opacity-40"
-        >
-          {running ? "burning" : "replay"}
-        </button>
       </div>
       {caption ? (
         <figcaption className="mt-3 text-center font-mono text-xs leading-relaxed text-zinc-500">
