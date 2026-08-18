@@ -8,15 +8,11 @@ image: "/blog/agent-os.png"
 imageAlt: "An Audi quattro on an empty road at dusk, hills and sky painted in purple and orange"
 ---
 
-Every agent I have handed a new machine to starts the same way. It runs `ls`. It reads a config file that moved two releases ago. It picks the wrong package manager, gets corrected, and apologises. Ten minutes later it knows things I could have told it in one line.
+Every agent I hand a new machine to starts the same way. It runs `ls`. It opens a config file that moved two releases ago. It picks the wrong package manager, gets corrected, and apologises. Ten minutes later it knows things I could have told it in one line.
 
-The model was never the problem there. Nobody had told it anything.
+For a long time I read that as the model being careless. It isn't. Nobody had told it anything.
 
-## A guest with a shell
-
-Most setups treat an agent as a guest. You give it a terminal and it works out the rest by touching things. Which init system is this. Where does the compositor keep its config. Is that service masked or just stopped. It cannot see that something segfaulted four seconds ago, because nothing routes that to it. It has a shell and no standing.
-
-That works, in the way that handing someone a keyboard and no password works. It is just expensive, and you pay the cost again in the next session.
+We hand an agent a terminal and call that giving it access. It works the rest out by touching things. Which init system this is, where the compositor keeps its config, whether that service is masked or just stopped. It cannot see that something crashed four seconds ago, because nothing routes that anywhere near it. It has a shell and no standing. That works the way handing someone a keyboard and no password works, and you pay for it again in the next session, and the one after that.
 
 {/* Subgraphs render right to left, so the good case is declared first to put
     the guest case on the left. */}
@@ -36,48 +32,21 @@ flowchart TB
   end
 `} />
 
-## Two manuals
+I have been running Omarchy for a while now and I like it more than I expected to. It started as a good Arch install that somebody else had already argued about, which was enough. Quattro shipped last week and it turned into something I actually want to write about.
 
-Omarchy Quattro shipped last week, and the interesting thing about it is not the agent picker. It is that the release contains two manuals.
+The interesting thing in it is not the agent picker. It is that the release quietly contains two manuals. One is written for me, a proper guide sitting in the menu, and DHH is blunt about why it exists. He thinks software should ship with good manuals. Fine, and rare, but not new.
 
-One is for you. There is a written guide in the menu now, and DHH is explicit about why: he thinks software products should ship with good manuals. Fine, and rare, but not new.
+The other one is written for my agent. The system installs skills that describe itself, including one that teaches an agent how to reconfigure the machine and one for reading a crash. His own summary of the point is better than anything I would write. Ask your agent to do something on a fresh install and it is going to know stuff, and the reason it is going to know stuff is that the system shipped skills.
 
-The other is for your agent. The system installs skills that describe itself, including one that teaches an agent how to reconfigure the machine and one for reading a crash. His own summary of the point is hard to improve on. Ask your agent to do something on a fresh Omarchy install and it is going to know stuff, and the reason it is going to know stuff is that the system shipped skills.
+That is smaller and more boring than the phrase agentic operating system suggests, and I think it is the whole thing. The machine writes documentation for a reader who is not you.
 
-That is the whole idea, and it is smaller and more boring than the marketing around agentic anything. The machine writes documentation for a reader who is not you.
+Once you look at it that way the rest of the release stops reading like a feature list. The agent gets picked during setup next to the keyboard layout and the timezone, and installs itself the first time you reach for it. When something segfaults you get a notification, and clicking it hands the core dump over with a skill for reading backtraces, and it knows how to write the bug report properly if the problem turns out to be Omarchy itself. The agents run on mise instead of system packages, which sounds like plumbing and isn't, because they ship several times a day and nobody wants to update their whole machine to get a fix. Every one of those is the same move. Stop making the agent infer something the system already knows.
 
-| What a task needs | Agent as a guest | Agent as a user of the system |
-| --- | --- | --- |
-| Which package manager | Infer it from files on disk | The system says |
-| Where a config lives | Search, then guess | Documented, in a skill |
-| Something just crashed | No way to know | Core dump handed over with a diagnose skill |
-| Change a system setting | Write a file and hope | A described procedure |
-| Which agent is installed | You install it yourself | Picked at setup, installed on first use |
-| Keeping the agent current | Fights the system packages | mise, out of band, on its own schedule |
+Knowing what to do is not the same as it being safe to do, and this is where most talk about agentic desktops falls over. Omarchy is a system package now rather than a git checkout in your home directory, which is how it used to work and how it used to break. Your changes sit on top as their own layer. You can clone a built in plugin and have your copy win, and an update will not reach in and overwrite you. Every update takes a snapshot first, and you can boot the one from before. Let the agent change the system, and make every change cheap to undo. Neither half is worth much alone. A machine an agent cannot modify is a machine it cannot help you with, and a machine you cannot roll back is one you will never let it near.
 
-That last row sounds like plumbing and is not. Agents ship many times a day. Tying them to system packages means updating the whole machine to get a fix, so Quattro puts them on mise with a separate update command. The agent moves at its own speed.
+The pitch underneath all of this is not really about agents at all. DHH has said he put thousands of hours into his own setup, and almost nobody else is going to do that, which is why most people run an operating system they are not allowed to have opinions about. His demo was pointing an agent at a web page for a Mac app he liked and asking for something similar as a panel for his bar. He got one. He did not pick the details and cheerfully said so. Malleability used to be gated on time. If it stops being gated on time, an opinionated system with good defaults and a documented way in is worth more than a system that is merely configurable.
 
-## Knowing is not enough
-
-A skill tells the agent what to do. It does not make doing it safe, and this is where most agentic desktop talk falls over.
-
-Quattro's answer is layering. Omarchy is a system package now rather than a git checkout in your home directory, which is how it used to work and how it used to break. Your changes sit on top as their own layer. You can clone a built-in plugin and have your copy supersede it, and an update will not reach in and overwrite you. Every update takes a snapshot first, and you can boot into the one from before.
-
-<Callout type="tip" title="The rule that does the most work">
-  Let the agent change the system, and make every change cheap to undo. Neither half is useful alone. A machine an agent cannot modify is a machine it cannot help you with, and a machine you cannot roll back is one you will not let it touch.
-</Callout>
-
-## The thousand hours
-
-The pitch underneath all of this is not really about agents. DHH has said he put thousands of hours into his own setup. Almost nobody else is going to do that, which is why most people run an operating system they are not allowed to have opinions about.
-
-His demo for this was pointing an agent at a web page for a Mac app he liked and asking for something similar as a panel for his bar. He got one. He did not pick the details and cheerfully said so.
-
-That is a small thing that suggests a large one. Malleability used to be gated on time. If it stops being gated on time, an opinionated system with good defaults and a documented way in is worth more than a system that is merely configurable.
-
-## Where this goes
-
-The browser is the same argument one layer up, and it is further behind. Agents drive browsers today by pretending to be a mouse, through coordinates that break on a layout shift or selectors that break on a refactor. Meanwhile the accessibility tree sits there, already maintained, already describing what everything is and does.
+The browser is the same argument one layer up and it is further behind. Agents drive browsers today by pretending to be a mouse, through coordinates that break on a layout shift or selectors that break on a refactor. Meanwhile the accessibility tree sits right there, already maintained, already describing what everything is and does.
 
 <Mermaid caption="The split that matters is not AI or not AI. It is described or not described." chart={`
 flowchart LR
@@ -87,21 +56,13 @@ flowchart LR
   D --> E[Breaks on the next redesign]
 `} />
 
-So my guess is that the interesting division will not be agentic operating systems against normal ones. It will be systems that describe themselves against systems that make the agent infer. Inference is where the tokens go and where the mistakes come from.
+So my guess is the division that ends up mattering is not agentic against normal. It is systems that describe themselves against systems that make the agent work it out. Inference is where the tokens go and where the mistakes come from.
 
-## When a plain sandbox still wins
+None of which makes it the right answer everywhere. An agent that is a real user of your machine has your blast radius, and that is the point of it and also the problem with it. For anything I would not hand my own login to I still want a container, and the plugins are not sandboxed, which DHH says plainly rather than papering over. This is for the machine you already trust the agent on. It is not a security boundary and it does not claim to be.
 
-An agent that is a real user of your machine has your blast radius. That is the point of it and also the problem with it.
+One last thing, because it made me laugh when I found it. The Quattro screensaver picks a random effect from terminaltexteffects, which the Omarchy folks rewrote in Rust as ttfx. I sent a couple of small fixes that way, so I went and read how one of them actually works.
 
-For anything you would not hand your own login to, a container is still correct. Untrusted code, CI, anything that has to be identical on every run. A desktop full of your preferences is the opposite of reproducible, and Omarchy's plugins are not sandboxed, which DHH says plainly rather than papering over.
-
-The agentic desktop is for the machine you already trust the agent on. It is not a security boundary and it does not claim to be.
-
-## One more thing from the same people
-
-Quattro's screensaver is a random effect from terminaltexteffects, which the Omarchy folks rewrote in Rust as ttfx. I sent a couple of small fixes that way, so I went and read how one of the effects actually works.
-
-The one below is smoke. The look does not come from the block characters. It comes from the traversal. Flood the grid directly and you get a clean expanding disc that reads as a wipe. ttfx builds a weighted spanning tree over the characters first and walks that breadth-first, so the front is forced through a random branching structure and arrives in tendrils. Same symbols, completely different thing.
+The one below is smoke. The look does not come from the block characters, which is what I assumed. It comes from the traversal. Flood the grid directly and you get a clean expanding disc that reads as a wipe. ttfx builds a weighted spanning tree over the characters first and walks that breadth first, so the front is forced through a random branching structure and arrives in tendrils instead. Same symbols, completely different thing.
 
 <SmokeText
   caption="ttfx smoke, ported to the browser. Weighted Prim's spanning tree, walked breadth-first."
@@ -114,4 +75,4 @@ The one below is smoke. The look does not come from the block characters. It com
  ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   
 `} />
 
-A screensaver is a strange place to find the thesis of a release. But it is the same move as the skills. Somebody decided the machine should describe itself well enough that the thing reading it does not have to guess.
+A screensaver is a strange place to find the thesis of a release. But it is the same move as the skills. Somebody decided the machine should describe itself well enough that whatever is reading it does not have to guess.

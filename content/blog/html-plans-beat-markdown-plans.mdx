@@ -10,9 +10,9 @@ imageAlt: "Two line-art documents side by side: a plain Markdown checklist on th
 
 Every plan I wrote in Markdown had the same fate. I read it once while it was being written, skimmed it later, and nobody else on the team opened it at all.
 
-The format was the problem. A Markdown task carries one bit: done, or not done. A real feature plan needs to carry a mockup, an API shape, three states nobody thought about, and the reason the second approach was rejected.
+It took me a while to stop blaming the team for that. The format was the problem. A Markdown task carries one bit, done or not done, and a real feature plan needs to carry a mockup, an API shape, three states nobody thought about, and the reason the second approach got rejected. None of that survives as a bullet point.
 
-## The difference is who reads it
+What actually changes is when the reading happens. Markdown pushes review to the end, where it is expensive and everyone is already committed. HTML pulls it to the front, where changing your mind is free.
 
 {/* Subgraphs render right to left, so HTML is declared first to put
     Markdown on the left. flowchart TB with inner TB is what lays them out
@@ -33,38 +33,15 @@ flowchart TB
   end
 `} />
 
-Markdown moves review to the end, where it is expensive. HTML moves it to the front, where it is cheap.
-
-## What each format can actually hold
-
-| A plan needs to show | Markdown | Single HTML file |
-| --- | --- | --- |
-| Task done or not done | Checkbox | Checkbox |
-| Blocked, and blocked on what | Prose beside the box | Attribute you can query |
-| What the screen looks like | Link to Figma, if it exists | Real mockup, styled with the product's own CSS |
-| Loading, error, empty, permission states | A bullet each, usually skipped | A button per state |
-| Two competing approaches | Two sections, read in sequence | Side by side, or a toggle |
-| API and data flow | ASCII art | An actual diagram |
-| Which repo the work lands in | A heading | A labelled map |
-| Read by a non engineer | Rarely | Open the file |
+Once the plan is a page, things that used to be a line of prose get to be real. Blocked stops being a word next to a checkbox and becomes something you can actually query. The screen stops being a link to a Figma file that may or may not exist and becomes a mockup styled with the product's own CSS. Loading, error, empty and permission states stop being four bullets everyone skips and become four buttons somebody clicks. Two competing approaches sit next to each other instead of one after the other, so you can compare them rather than remember the first one. The data flow gets to be a diagram instead of ASCII art. And somebody who does not write code can open it, which is the part that surprised me most.
 
 None of this is exotic. It is one file, opened in a browser, with no build step.
 
-## The prompt I use
+The instruction I give is short. Produce one self contained HTML file, reuse the product's existing UI as the visual source of truth, keep alternatives on the same page behind a toggle, and prefer mockups and diagrams over paragraphs.
 
-The whole thing is a single instruction: produce one self contained HTML file, reuse the product's existing UI as the visual source of truth, keep alternatives on the same page behind a toggle, and prefer mockups and diagrams over paragraphs.
+That second rule does most of the work, and it took me a few bad plans to understand why. The current frontend is the visual source of truth. Not a template, not a fresh design language, not whatever the model thinks a dashboard looks like. If the plan does not look like the product, nobody trusts what it is proposing, and you spend the meeting arguing about the mockup instead of the idea. The rest is a checklist I barely think about anymore. Every requested feature represented, backend and cross repo work included even when it is invisible in the UI, assumptions clearly separated from confirmed behaviour, and every demo button actually working.
 
-<Callout type="tip" title="The rule that does the most work">
-  Treat the current frontend as the visual source of truth. Not a template, not a fresh design language. If the plan does not look like the product, nobody trusts what it is proposing.
-</Callout>
-
-The rest is a checklist: every requested feature represented, backend and cross repo work included even when it is invisible in the UI, assumptions clearly separated from confirmed behaviour, and every demo button actually working.
-
-## The part that made it stick
-
-I got the idea from [Theo](https://t3.gg), looked at how he was using it, and then built the piece that made it work for me.
-
-The plan is not a file I open on my own machine. Any agent can write one, and it deploys through a tunnel as soon as it lands. So I read it wherever I am, usually on my phone, and so does everyone else I send the link to.
+I got the idea from [Theo](https://t3.gg), looked at how he was using it, and then built the piece that made it stick for me. The plan is not a file I open on my own machine. Any agent can write one and it deploys through a tunnel as soon as it lands, so I read it wherever I am, usually on my phone, and so does everyone else I send the link to. That sounds like a small logistical detail and it is the entire difference between a plan that gets read and one that does not.
 
 <Mermaid caption="One link, whatever device is nearby. No repo, no build step, no screen sharing." chart={`
 flowchart LR
@@ -74,18 +51,6 @@ flowchart LR
   B --> E[Anyone with the link]
 `} />
 
-Each plan also splits by where the work actually lands:
+Each plan leads with whatever the work actually is. Frontend changes open with the mockup in the product's own styling and then the component and state map. Backend changes open with the API contracts and the data flow, then where it lands repo by repo. When it is both, the two views sit on one page and you can switch between them, so neither gets reviewed in isolation and forgotten. Benchmarks and the acceptance checklist go at the bottom of the same file. One artifact, one link, nothing to assemble later.
 
-| Change type | What the plan leads with |
-| --- | --- |
-| Frontend | Mockup in the product's own styling, then component and state map |
-| Backend | API contracts and data flow, then the repo level implementation map |
-| Both | The two views on one page, switchable, so nothing gets reviewed in isolation |
-
-Benchmarks and the acceptance checklist sit at the bottom of the same file. One artifact, one link, nothing to assemble later.
-
-## When Markdown still wins
-
-Short plans. Three tasks and a decision, read once by one person, done by lunch. Reaching for HTML there is ceremony.
-
-The switch pays off at the size where a plan stops being a list and starts being a document that somebody else has to agree with.
+I still write Markdown plans. Three tasks and a decision, read once by one person, done by lunch. Reaching for HTML there is ceremony and everyone can tell. The switch pays off at the size where a plan stops being a list and starts being a document somebody else has to agree with.
