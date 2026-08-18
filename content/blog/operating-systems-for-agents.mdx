@@ -1,0 +1,117 @@
+---
+title: "The agent is a user now"
+description: "Omarchy Quattro ships a manual for you and a set of skills for your agent. Once the machine describes itself, the agent stops guessing, and that turns out to be the whole trick."
+date: "2026-08-18"
+tags: ["agents", "linux", "tooling"]
+draft: false
+image: "/blog/agent-os.png"
+imageAlt: "An Audi quattro on an empty road at dusk, hills and sky painted in purple and orange"
+---
+
+Every agent I have handed a new machine to starts the same way. It runs `ls`. It reads a config file that moved two releases ago. It picks the wrong package manager, gets corrected, and apologises. Ten minutes later it knows things I could have told it in one line.
+
+The model was never the problem there. Nobody had told it anything.
+
+## A guest with a shell
+
+Most setups treat an agent as a guest. You give it a terminal and it works out the rest by touching things. Which init system is this. Where does the compositor keep its config. Is that service masked or just stopped. It cannot see that something segfaulted four seconds ago, because nothing routes that to it. It has a shell and no standing.
+
+That works, in the way that handing someone a keyboard and no password works. It is just expensive, and you pay the cost again in the next session.
+
+{/* Subgraphs render right to left, so the good case is declared first to put
+    the guest case on the left. */}
+<Mermaid caption="Same task, same model. The difference is whether the machine says anything." chart={`
+flowchart TB
+  subgraph US[Agent as a user]
+    direction TB
+    U1[Task arrives] --> U2[System describes itself]
+    U2 --> U3[Agent acts]
+    U3 --> U4[System events reach the agent]
+  end
+  subgraph GU[Agent as a guest]
+    direction TB
+    G1[Task arrives] --> G2[Probe the machine]
+    G2 --> G3[Guess, retry, apologise]
+    G3 --> G4[Crash happens somewhere it cannot see]
+  end
+`} />
+
+## Two manuals
+
+Omarchy Quattro shipped last week, and the interesting thing about it is not the agent picker. It is that the release contains two manuals.
+
+One is for you. There is a written guide in the menu now, and DHH is explicit about why: he thinks software products should ship with good manuals. Fine, and rare, but not new.
+
+The other is for your agent. The system installs skills that describe itself, including one that teaches an agent how to reconfigure the machine and one for reading a crash. His own summary of the point is hard to improve on. Ask your agent to do something on a fresh Omarchy install and it is going to know stuff, and the reason it is going to know stuff is that the system shipped skills.
+
+That is the whole idea, and it is smaller and more boring than the marketing around agentic anything. The machine writes documentation for a reader who is not you.
+
+| What a task needs | Agent as a guest | Agent as a user of the system |
+| --- | --- | --- |
+| Which package manager | Infer it from files on disk | The system says |
+| Where a config lives | Search, then guess | Documented, in a skill |
+| Something just crashed | No way to know | Core dump handed over with a diagnose skill |
+| Change a system setting | Write a file and hope | A described procedure |
+| Which agent is installed | You install it yourself | Picked at setup, installed on first use |
+| Keeping the agent current | Fights the system packages | mise, out of band, on its own schedule |
+
+That last row sounds like plumbing and is not. Agents ship many times a day. Tying them to system packages means updating the whole machine to get a fix, so Quattro puts them on mise with a separate update command. The agent moves at its own speed.
+
+## Knowing is not enough
+
+A skill tells the agent what to do. It does not make doing it safe, and this is where most agentic desktop talk falls over.
+
+Quattro's answer is layering. Omarchy is a system package now rather than a git checkout in your home directory, which is how it used to work and how it used to break. Your changes sit on top as their own layer. You can clone a built-in plugin and have your copy supersede it, and an update will not reach in and overwrite you. Every update takes a snapshot first, and you can boot into the one from before.
+
+<Callout type="tip" title="The rule that does the most work">
+  Let the agent change the system, and make every change cheap to undo. Neither half is useful alone. A machine an agent cannot modify is a machine it cannot help you with, and a machine you cannot roll back is one you will not let it touch.
+</Callout>
+
+## The thousand hours
+
+The pitch underneath all of this is not really about agents. DHH has said he put thousands of hours into his own setup. Almost nobody else is going to do that, which is why most people run an operating system they are not allowed to have opinions about.
+
+His demo for this was pointing an agent at a web page for a Mac app he liked and asking for something similar as a panel for his bar. He got one. He did not pick the details and cheerfully said so.
+
+That is a small thing that suggests a large one. Malleability used to be gated on time. If it stops being gated on time, an opinionated system with good defaults and a documented way in is worth more than a system that is merely configurable.
+
+## Where this goes
+
+The browser is the same argument one layer up, and it is further behind. Agents drive browsers today by pretending to be a mouse, through coordinates that break on a layout shift or selectors that break on a refactor. Meanwhile the accessibility tree sits there, already maintained, already describing what everything is and does.
+
+<Mermaid caption="The split that matters is not AI or not AI. It is described or not described." chart={`
+flowchart LR
+  A[Agent needs to act] --> B{Does the surface describe itself?}
+  B -->|Yes| C[Read it, act, verify]
+  B -->|No| D[Screenshot and guess]
+  D --> E[Breaks on the next redesign]
+`} />
+
+So my guess is that the interesting division will not be agentic operating systems against normal ones. It will be systems that describe themselves against systems that make the agent infer. Inference is where the tokens go and where the mistakes come from.
+
+## When a plain sandbox still wins
+
+An agent that is a real user of your machine has your blast radius. That is the point of it and also the problem with it.
+
+For anything you would not hand your own login to, a container is still correct. Untrusted code, CI, anything that has to be identical on every run. A desktop full of your preferences is the opposite of reproducible, and Omarchy's plugins are not sandboxed, which DHH says plainly rather than papering over.
+
+The agentic desktop is for the machine you already trust the agent on. It is not a security boundary and it does not claim to be.
+
+## One more thing from the same people
+
+Quattro's screensaver is a random effect from terminaltexteffects, which the Omarchy folks rewrote in Rust as ttfx. I sent a couple of small fixes that way, so I went and read how one of the effects actually works.
+
+The one below is smoke. The look does not come from the block characters. It comes from the traversal. Flood the grid directly and you get a clean expanding disc that reads as a wipe. ttfx builds a weighted spanning tree over the characters first and walks that breadth-first, so the front is forced through a random branching structure and arrives in tendrils. Same symbols, completely different thing.
+
+<SmokeText
+  caption="ttfx smoke, ported to the browser. Weighted Prim's spanning tree, walked breadth-first."
+  text={`
+ █████╗  ██████╗ ███████╗███╗   ██╗████████╗   ██████╗ ███████╗
+██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝  ██╔═══██╗██╔════╝
+███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║     ██║   ██║███████╗
+██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║     ██║   ██║╚════██║
+██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║     ╚██████╔╝███████║
+╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝      ╚═════╝ ╚══════╝
+`} />
+
+A screensaver is a strange place to find the thesis of a release. But it is the same move as the skills. Somebody decided the machine should describe itself well enough that the thing reading it does not have to guess.
