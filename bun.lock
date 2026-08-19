@@ -14,6 +14,8 @@
         "@vercel/analytics": "^2.0.1",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "d3-scale": "^4.0.2",
+        "d3-shape": "^3.2.0",
         "geist": "^1.7.1",
         "github-slugger": "^2.0.0",
         "gray-matter": "^4.0.3",
@@ -37,6 +39,8 @@
       "devDependencies": {
         "@tailwindcss/postcss": "^4.3.0",
         "@tailwindcss/typography": "^0.5.20",
+        "@types/d3-scale": "^4.0.9",
+        "@types/d3-shape": "^3.1.8",
         "@types/node": "^25.9.1",
         "@types/react": "^19.2.15",
         "@types/react-dom": "^19.2.3",
