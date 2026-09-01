@@ -221,17 +221,18 @@ const openSourceData: OpenSourceOrg[] = [
     ],
   },
   {
-    key: "omarchy",
-    iconUrl: "https://github.com/basecamp.png?size=128",
-    label: "basecamp/omarchy",
-    merged: 4,
-    name: "Omarchy",
-    description: "Beautiful, modern and opinionated Linux, from Basecamp. Arch and Hyprland, configured out of the box.",
-    siteUrl: "https://omarchy.org",
+    key: "omacom",
+    iconUrl: "https://github.com/omacom.png?size=128",
+    label: "omacom",
+    sub: "Omarchy · 2 repos",
+    merged: 6,
+    name: "Omacom",
+    description: "Beautiful, modern and opinionated Linux — Arch and Hyprland configured out of the box. ttfx is a parity-exact Rust port of terminaltexteffects, shipped as a single static binary.",
+    siteUrl: "https://omacom.io",
     accent: "#f97316",
     repos: [
       {
-        repo: "basecamp/omarchy",
+        repo: "omacom/omarchy",
         merged: 4,
         prs: [
           { num: 6763, title: "Keep shell tests inside their fixtures" },
@@ -240,20 +241,8 @@ const openSourceData: OpenSourceOrg[] = [
           { num: 6732, title: "Only offer video capture devices as webcams" },
         ],
       },
-    ],
-  },
-  {
-    key: "omacom",
-    iconUrl: "https://github.com/omacom-io.png?size=128",
-    label: "omacom-io/ttfx (Omarchy)",
-    merged: 2,
-    name: "Omacom",
-    description: "Opinionated Linux — the team behind Omarchy. ttfx is a parity-exact Rust port of terminaltexteffects, shipped as a single static binary.",
-    siteUrl: "https://omacom.io",
-    accent: "#8b5cf6",
-    repos: [
       {
-        repo: "omacom-io/ttfx",
+        repo: "omacom/ttfx",
         merged: 2,
         prs: [
           { num: 9, title: "Restore the cursor on SIGTERM" },
@@ -266,7 +255,7 @@ const openSourceData: OpenSourceOrg[] = [
     key: "t3code",
     iconUrl: "https://github.com/pingdotgg.png?size=128",
     label: "pingdotgg/t3code",
-    merged: 4,
+    merged: 5,
     name: "T3 Code",
     description: "An agent harness control surface from Ping.gg. Drive Claude Code, Codex, Cursor and OpenCode from mobile, web, or desktop.",
     siteUrl: "https://t3.codes",
@@ -274,8 +263,9 @@ const openSourceData: OpenSourceOrg[] = [
     repos: [
       {
         repo: "pingdotgg/t3code",
-        merged: 4,
+        merged: 5,
         prs: [
+          { num: 8634, title: "Skip IDE detection during Claude probes" },
           { num: 4470, title: "Keep the server alive when a response write hits a dead socket" },
           { num: 4469, title: "Limit physical key fallback to non-Latin layout output" },
           { num: 4468, title: "Keep block code plain when copying from rendered markdown" },

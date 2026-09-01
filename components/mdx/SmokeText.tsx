@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef } from "react"
 
-// Ported from omacom-io/ttfx (src/effects/smoke.rs), itself a parity-exact Rust
+// Ported from omacom/ttfx (src/effects/smoke.rs), itself a parity-exact Rust
 // port of terminaltexteffects' effect_smoke.py.
 //
 // The look does not come from the block symbols. It comes from the traversal.
