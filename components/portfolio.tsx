@@ -255,7 +255,7 @@ const openSourceData: OpenSourceOrg[] = [
     key: "t3code",
     iconUrl: "https://github.com/pingdotgg.png?size=128",
     label: "pingdotgg/t3code",
-    merged: 5,
+    merged: 8,
     name: "T3 Code",
     description: "An agent harness control surface from Ping.gg. Drive Claude Code, Codex, Cursor and OpenCode from mobile, web, or desktop.",
     siteUrl: "https://t3.codes",
@@ -263,9 +263,12 @@ const openSourceData: OpenSourceOrg[] = [
     repos: [
       {
         repo: "pingdotgg/t3code",
-        merged: 5,
+        merged: 8,
         prs: [
+          { num: 8751, title: "Allow local-only worktree bases" },
+          { num: 8750, title: "Bound OpenCode version probes" },
           { num: 8634, title: "Skip IDE detection during Claude probes" },
+          { num: 8630, title: "Avoid stale file writes on close" },
           { num: 4470, title: "Keep the server alive when a response write hits a dead socket" },
           { num: 4469, title: "Limit physical key fallback to non-Latin layout output" },
           { num: 4468, title: "Keep block code plain when copying from rendered markdown" },
