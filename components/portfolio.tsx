@@ -348,6 +348,71 @@ const openSourceTotals = {
   repos: openSourceData.reduce((n, o) => n + o.repos.length, 0),
 }
 
+const PR_VISIBLE = 5
+
+// Repos run from 1 to 18 merged, and on the busy ones `prs` is a curated subset
+// rather than the full set. Rendering every entry made card height track how
+// complete the data happened to be; capping at five without saying so hid the
+// rest silently — gumroad read "18 merged" above exactly five rows. So cap, then
+// state both kinds of remainder: expand the ones we hold, link out for the ones
+// we never wrote down.
+function RepoPrList({ repo, nested = false }: { repo: OpenSourceRepo; nested?: boolean }) {
+  const [expanded, setExpanded] = useState(false)
+  const visible = expanded ? repo.prs : repo.prs.slice(0, PR_VISIBLE)
+  const collapsed = repo.prs.length - visible.length
+  // Merges we know the count of but never listed a title for.
+  const undocumented = repo.merged - repo.prs.length
+
+  return (
+    <>
+      <ul
+        className={`${nested ? "mt-1.5" : "mt-2"} pl-4 sm:pl-5 border-l border-zinc-200 dark:border-zinc-700 space-y-1.5 text-sm`}
+      >
+        {visible.map((pr) => (
+          <li key={pr.num} className="flex items-start gap-2">
+            <GitMerge
+              className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-[#8957e5] dark:text-[#a371f7]"
+              aria-label="merged"
+            />
+            <a
+              href={`https://github.com/${repo.repo}/pull/${pr.num}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-700 dark:text-zinc-300 hover:underline leading-snug break-words"
+            >
+              {pr.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      {(collapsed > 0 || expanded || undocumented > 0) && (
+        <div className="mt-1.5 pl-4 sm:pl-5 flex items-center gap-3 font-mono text-[10px] text-zinc-500">
+          {(collapsed > 0 || expanded) && (
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="hover:text-zinc-900 dark:hover:text-white transition-colors"
+            >
+              {expanded ? "show less" : `+ ${collapsed} more`}
+            </button>
+          )}
+          {undocumented > 0 && (
+            <a
+              href={`https://github.com/${repo.repo}/pulls?q=is%3Apr+author%3Ayashranaway+is%3Amerged`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-zinc-900 dark:hover:text-white transition-colors"
+            >
+              + {undocumented} on GitHub ↗
+            </a>
+          )}
+        </div>
+      )}
+    </>
+  )
+}
+
 interface PortfolioProps {
   contributions: Contribution[]
   /** Newest few posts, read server-side in app/page.tsx. */
@@ -909,24 +974,7 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
 
                   <div className="pl-6 sm:pl-12 pr-4 pb-4">
                     {single ? (
-                      <ul className="mt-2 pl-4 sm:pl-5 border-l border-zinc-200 dark:border-zinc-700 space-y-1.5 text-sm">
-                        {org.repos[0].prs.map((pr) => (
-                          <li key={pr.num} className="flex items-start gap-2">
-                            <GitMerge
-                              className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-[#8957e5] dark:text-[#a371f7]"
-                              aria-label="merged"
-                            />
-                            <a
-                              href={`https://github.com/${org.repos[0].repo}/pull/${pr.num}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-zinc-700 dark:text-zinc-300 hover:underline leading-snug break-words"
-                            >
-                              {pr.title}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
+                      <RepoPrList repo={org.repos[0]} />
                     ) : (
                       org.repos.map((repo, ri) => (
                         <details key={repo.repo} className={ri === 0 ? "mt-2" : "mt-3"}>
@@ -945,24 +993,7 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
                               {repo.merged} merged ↗
                             </span>
                           </summary>
-                          <ul className="mt-1.5 pl-4 sm:pl-5 border-l border-zinc-200 dark:border-zinc-700 space-y-1.5 text-sm">
-                            {repo.prs.map((pr) => (
-                              <li key={pr.num} className="flex items-start gap-2">
-                                <GitMerge
-                                  className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-[#8957e5] dark:text-[#a371f7]"
-                                  aria-label="merged"
-                                />
-                                <a
-                                  href={`https://github.com/${repo.repo}/pull/${pr.num}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-zinc-700 dark:text-zinc-300 hover:underline leading-snug break-words"
-                                >
-                                  {pr.title}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
+                          <RepoPrList repo={repo} nested />
                         </details>
                       ))
                     )}
