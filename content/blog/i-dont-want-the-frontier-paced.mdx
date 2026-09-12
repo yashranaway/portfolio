@@ -32,9 +32,13 @@ flowchart TB
   end
 `} />
 
-T3 Code is the piece that made this portable rather than impressive. It is an agent harness you drive from a phone or a browser, so the work stops being tied to the machine it started on. I have 11 changes merged into it now, which means I spend part of my week fixing the tool I spend the rest of my week inside. That loop is the most productive thing I have ever been part of. I find something annoying on a Tuesday, I fix it, and by the weekend it is annoying for nobody.
+T3 Code is what makes that portable. It is an agent harness you drive from a phone or a browser, so the work stops being tied to the machine it started on. I have 11 changes merged into it, so I spend part of my week fixing the tool I spend the rest of the week inside. Omarchy does something similar one layer down, shipping skills that describe the machine so my agent stops guessing where the compositor keeps its config.
 
-Omarchy did the same thing one layer down. Once the machine ships skills that describe itself, my agent stops guessing what init system this is or where the compositor keeps its config. I wrote a whole post about that and the short version is that every hour an agent spends inferring something the system already knew is an hour billed to me.
+Both of those are plumbing, though, and I want to be accurate about credit. Every job that came off my desk this year came off it on a model release, not a tooling release.
+
+gpt-5.4 in March was the first time I handed over a change that crossed three repos and did not sit there watching it. 5.5 in April fixed the failure I hated most, the long task where step 12 quietly poisons everything after it and you only find out at the end. The 5.6 line is where reading an unfamiliar codebase stopped being the thing I did first and became the thing I delegated first. Then gpt-6-astra, and the rate at which I have to correct anything dropped again.
+
+The review side moved just as hard. Fable 5.1 and Opus 5 are the reason I can look at 40 merged pull requests without lying awake. They read a diff the way a good colleague does, which is to say they ask what the change is for before they tell you what is wrong with it. Two years ago the model wrote code and I checked it. Now the model writes it, a better model checks it, and I arbitrate. My job moved up a level and I did not have to get smarter for that to happen.
 
 So this has been, by a distance, the best year of work I have had. That is the honest baseline, and it is why I am about to disagree with someone much better informed than me.
 
