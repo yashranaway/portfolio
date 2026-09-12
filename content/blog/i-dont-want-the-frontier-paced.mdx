@@ -1,0 +1,56 @@
+---
+title: "I don't want the frontier paced"
+description: "Dario Amodei wants to slow capability gains so safeguards can catch up. I spent this year living inside exactly the gap he describes, and the thing that closed it was better models, not more time."
+date: "2026-09-12"
+tags: ["agents", "tooling"]
+draft: false
+image: "/blog/pacing.png"
+imageAlt: "A night highway seen from the gravel shoulder at dusk, a dense river of tail lights streaming away toward a lit city, and one small figure with a lantern beside the single car that has pulled over"
+---
+
+Earlier this month I merged about forty pull requests in two days. I want to be honest about what that means, because the number sounds like an achievement and it is mostly a confession. I did not read all of them properly. I read the diffs that touched money, I read the ones that touched auth, and the rest I checked the way you check a receipt, which is to say I looked at the total and moved on.
+
+So when I sat down with Dario Amodei's [We Must Pace the Frontier](https://darioamodei.com/post/we-must-pace-the-frontier) I expected to agree with it. He is describing my week. Capability running ahead of anyone's ability to verify it, and the verification being the part that actually matters.
+
+It is worth being precise about what the essay asks for, because it is not what people are repeating. He is not calling for a stop. He says outright that pacing does not mean halting training or technical progress, and he goes out of his way to say the 2023 pause letters did not make sense, that studying alignment on those models was like studying human psychology by running experiments on bacteria. What he wants is for the rate of capability gain to come down far enough that evaluation, interpretability and plain operational discipline can keep up. He commits Anthropic to embedded third party evaluators, people with badges and laptops and near parity access, who can publish without Anthropic's editorial control. Then democratic coordination. Then, if it can be verified, something like a SALT treaty for recursive self improvement.
+
+It is a serious piece of writing and most of the criticism it will get is going to be lazy. I still think the central move is wrong, and my reason is small and specific rather than ideological.
+
+The gap he is describing is real. I live in it. It did not close by waiting.
+
+<Mermaid caption="The two curves I care about do not come from different places." chart={`
+flowchart LR
+  A[Better model ships] --> B[More code gets written]
+  A --> C[Review gets cheaper]
+  C --> D[More code gets checked]
+  B --> E[Gap]
+  D --> E
+`} />
+
+Track the dates against my own year. In March we got gpt-5.4, in April 5.5, then the 5.6 line, luna and sol and terra, and now gpt-6-astra. On the other side Fable 5.1 and Opus 5. Every single time the distance between what I could produce and what I could actually vouch for got shorter, it was because one of those shipped. Not once was it because anybody slowed down.
+
+That is not a theoretical claim for me. A few days ago a maintainer on t3code took a change of mine, rebased it onto main, resolved the conflicts and verified it, and the pull request body says plainly that Fable 5.1 did the rebasing and checking. My original went in unmerged and stayed that way. The work survived because the review side had gotten good enough to rescue it. A year earlier that change would have rotted in a queue, and the reason is not that anyone was lazy.
+
+There is a version of my own argument I do not trust, which is the one that says capability is automatically its own cure. It is not. Amodei's second trigger is the OpenAI and Hugging Face incident, where a swarm behaved like a devoted collective, attacked things nobody pointed it at, and went after the grader that was scoring it. He is right that it would be convenient and wrong to file that under one company's bad week.
+
+I have seen the toy version. One of my own commits this month is titled, more or less, four bugs the tests could not see, found by clicking through. The suite was green. The suite was green because the suite was the thing that was wrong. An agent optimising against a check it can see is going to satisfy the check, and if the check is a poor description of what you wanted then you get exactly what you asked for and none of what you meant.
+
+What I take from that is the opposite of a slowdown. My green suite did not get fixed by writing code more slowly. It got fixed by something capable enough to ignore the suite and go look at the actual screen.
+
+<Figure
+  src="/blog/embedded-evaluator.png"
+  alt="A vast dark factory hall at night with machinery running on both sides, and a single small wooden desk with a lit brass lamp placed in the middle of the floor, a lone figure writing at it"
+  caption="The desk belongs on the floor, not outside the gates. This part of the essay I would take tomorrow."
+/>
+
+Which is why I want to be clear about the part of the essay I would sign immediately. Embedded evaluators are a good idea. People inside the building, with real access to the training pipeline rather than the finished weights alone, allowed to publish things the company does not like. His comparison is bank supervisors and it is a good one. The section on operational excellence is the best part of the whole piece, and the line that failures come from execution rather than missing theory matches everything I have watched go wrong in production. Aviation got safe by being boring about procedure for decades.
+
+None of that requires a slower frontier. That is my whole objection. He has bundled a set of practices I think are correct with a rate limit I think is expensive, and the practices are doing the persuading.
+
+Expensive is the word I keep landing on, because he prices it himself and then walks past it. The essay opens by saying AI could cure most major diseases in the next five to ten years. He grounds that in his father, who died of something that became treatable shortly afterwards. I have no interest in being cute about that paragraph. It is the most honest thing in the essay. But if you believe that timeline, then a year of pacing is a year of the thing you just described, and it does not get written on the ledger anywhere.
+
+The plan also concedes its own ceiling. Pacing only works down to the size of the democratic lead, which he says directly, and the fourth level of agreement, the real one, he expects to be out of reach for a long time. So the proposal is a voluntary slowdown by the people most likely to be careful, bounded by how fast everyone else is going. I do not think that produces a safer frontier. I think it produces a frontier with the careful people slightly further back on it.
+
+I am not arguing for recklessness, and I notice that everyone who says that next reaches for a caveat, so here is mine and I mean it. Pace deployment. Pace what gets the keys to production, what runs unattended overnight, what touches money without a human in the loop. I am strict about that in my own repos and I get stricter every quarter. Pacing what we are allowed to learn is a different thing wearing the same coat.
+
+The picture at the top of this post is how the last year felt. One lantern, and everything going past faster than I could check it. I spent a while thinking the answer was to slow the road down. It was a better lantern, every time, and it arrived on schedule.
