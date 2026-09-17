@@ -8,7 +8,13 @@ image: "/blog/same-idea.png"
 imageAlt: "Two separate mountain paths climbing opposite faces of the same peak at dawn, two small figures with lanterns arriving at the same ridge from different sides"
 ---
 
-On Tuesday a tweet went past with 28 million views on it. A man who helped build the reinforcement learning behind InstructGPT was coming out of two years of stealth with a model called Jev, a new training method, and forty million dollars.
+On Tuesday [a tweet](https://x.com/CompleteSkeptic/status/2099925682726002904) went past with 28 million views on it. A man who helped build the reinforcement learning behind InstructGPT was coming out of two years of stealth with a model called [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev), a new training method, and [forty million dollars](https://www.theregister.com/ai-and-ml/2026/09/16/typesafe-ai-debuts-model-for-machines-that-plays-doom/5296711).
+
+<Figure
+  src="/blog/jev-tweet.png"
+  alt="Diogo Almeida's launch post announcing Jev, a model trained with RLCD, claiming 20-200x faster and 40-400x cheaper"
+  caption={<>The post that started this, rendered from the <a href="https://x.com/CompleteSkeptic/status/2099925682726002904" target="_blank" rel="noopener noreferrer">original</a>.</>}
+/>
 
 I read it twice and then sat there a while, because he had just described, in better words than I have ever managed, the thing [Sarthak Wadegaonkar](https://github.com/SarthakWade) and I have been building since July.
 
@@ -18,7 +24,7 @@ We started [headless](https://github.com/LockInTime/headless) on 17 July, as a f
 
 The conviction was small and we never wrote it down. Agents are bad at browsers because we make them work through channels built for people. Pixel coordinates, which drift the moment a layout shifts. Or a DOM dump pasted into a prompt, where the model pays ten thousand tokens of markup to find one button. Neither failure is the model being stupid.
 
-So headless does not hand an agent a screen. It hands it a contract. You click by role and name, `click --role button --name Continue`. Page context arrives in stages, a summary first, then references like `@r4` you can look inside. At the end of August a warm run cost about 174 tokens on a flow where Selenium cost 410 and Puppeteer 499.
+So headless does not hand an agent a screen. It hands it a contract. You click by role and name, `click --role button --name Continue`. Page context arrives in stages, a summary first, then references like `@r4` you can look inside. At the end of August a warm run cost about 174 tokens on a flow where Selenium cost 410 and Puppeteer 499, [method and limits written up here](https://github.com/LockInTime/headless/blob/main/apps/headless/docs/BENCHMARK.md).
 
 I thought that was a niche opinion about browser automation.
 
@@ -46,7 +52,7 @@ It went when I read what he had actually built. He did not get there first and n
 
 The idea was the valuable part, and it was never ours to own.
 
-I should be straight about scale. browser-use has 114,000 stars, Chrome DevTools MCP has 52,000, headless has none, because it is two months old and we have not asked anyone for one. Being right about a direction and having built the thing that wins are different achievements, and I have only managed the first.
+I should be straight about scale. [browser-use](https://github.com/browser-use/browser-use) has 114,000 stars, [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) has 52,000, headless has none, because it is two months old and we have not asked anyone for one. Being right about a direction and having built the thing that wins are different achievements, and I have only managed the first.
 
 So this is a thank you note. To Sahil, whose one file we forked and wandered away from, for putting it where anyone could pick it up. To Diogo Almeida, for the research, and for saying in one line what I had been circling for two months. To Sarthak, who wrote half of it and is owed a better README.
 
