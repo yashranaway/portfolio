@@ -1,0 +1,57 @@
+---
+title: "Someone else had our idea"
+description: "We started headless in July on one conviction about how agents should talk to machines. In September a co-author of InstructGPT shipped a completely different product built on the same conviction, and that turned out to be the best thing that could have happened."
+date: "2026-09-17"
+tags: ["agents", "tooling"]
+draft: false
+image: "/blog/same-idea.png"
+imageAlt: "Two separate mountain paths climbing opposite faces of the same peak at dawn, two small figures with lanterns arriving at the same ridge from different sides"
+---
+
+On Tuesday I was half watching my phone when a tweet went past with 28 million views on it. A man who helped build the reinforcement learning behind InstructGPT and ChatGPT was coming out of two years of stealth with a new model called Jev, a new training method, and a forty million dollar seed round.
+
+I read the thread twice. Then I put the phone down and sat there for a bit, because he had just described, in much better words than I have ever managed, the thing [Sarthak Wadegaonkar](https://github.com/SarthakWade) and I have been building since July.
+
+Not the same product. I want to be exact about that, because the honest version of this story is better than the flattering one. But the same idea, and I had not expected to find it there.
+
+We started [headless](https://github.com/LockInTime/headless) on 17 July. It began as a fork of Sahil Lavingia's [chromeless](https://github.com/antiwork/chromeless), which is a lovely piece of work, one Swift file that gives you a browser with no interface for clean screenshots and video. We wanted something else from it and we drifted a long way from where it started. Two days later we shipped 1.0.1 and 1.0.2. Since then it has been most of my nights and 100 commits from Sarthak, which is close enough to half that I should stop saying my project.
+
+The conviction underneath it was small and we never wrote it down anywhere. Agents are bad at driving browsers because we make them do it through channels built for people. Screenshots and pixel coordinates, which drift the moment a layout shifts. Or enormous DOM dumps pasted into a prompt, where the model pays for ten thousand tokens of markup to find one button. Every agent I had watched fail at a browser task failed in one of those two ways, and neither failure was about the model being stupid.
+
+So headless does not give an agent a screen. It gives it a contract. You click by role and name, `click --role button --name Continue`, not by coordinate and not by CSS selector that breaks on the next refactor. Page context arrives progressively instead of all at once. You start with `--context summary`, get structural references like `@r4`, and then look inside only that region. The agent asks for what it needs and the interface bounds the answer.
+
+That is measurable, which was the part I cared about most. On the same fixture flow in Docker at the end of August, a warm headless run cost about 174 tokens where Selenium cost 410 and Puppeteer cost 499. Same task, less than half the surface. The security side went the same way. No arbitrary JavaScript, no TCP control, allowlisted commands over a private socket, cookie values redacted unless you deliberately start the host otherwise. Those are not settings that an agent can talk its way past. They are fixed policy, and the settings that do exist are split into what an agent may read, what it may change, and what only a person may touch.
+
+I thought that was a fairly niche opinion about browser automation.
+
+<Mermaid caption="Two products, two layers, one argument about who the interface is for." chart={`
+flowchart TB
+  subgraph JV[Jev]
+    direction TB
+    J1[Model emits prose for a machine] --> J2[Software parses and guesses]
+    J2 --> J3[Typed decision plus confidence]
+  end
+  subgraph HL[headless]
+    direction TB
+    H1[Agent reads pixels or DOM dumps] --> H2[Coordinates drift, tokens burn]
+    H2 --> H3[Semantic action plus bounded context]
+  end
+`} />
+
+Jev is not a browser tool. It is a model, and it does something I could not build in a hundred years of nights. You hand it a shared state and some typed questions and it returns choices with probabilities attached, calibrated so the confidence actually tracks the accuracy. It cannot write you a paragraph or hold a conversation, on purpose. Diogo Almeida's own line for it is that you should think of it as a frontier intelligence function call, unstructured state in, typed probabilistic decisions out. The site puts it more bluntly. LLMs produce words for people. Jev produces typed decisions.
+
+Read that sentence and then read mine again. Stop making the agent look at a picture of a page and guess where to click. His is about the output of the model, mine is about the world the model acts on, and they are the same complaint. We are both saying that the channel between a machine and another machine should not be the one we designed for humans, because it is lossy in one direction and expensive in the other. He proved it with a training method and a calibration curve. We proved it with a token count on a fixture flow.
+
+I have thought about very little else for two days, and the lesson is not the one I expected.
+
+My first reaction, for about ten minutes, was the bad one. Someone got there first, someone with a seed round and a research background and 28 million people reading his announcement. That feeling is worth naming because I think a lot of people building small things feel it and then pretend they did not.
+
+It went away when I actually read what he built, because he did not get there first and neither did I. We got to the same place from opposite ends of the stack at roughly the same time, and the interesting thing is not who was earlier. The interesting thing is that the idea was sitting there and more than one person walked into it. That is usually what it looks like when an idea is right. It stops being clever and starts being obvious, and it occurs to several people who are not talking to each other.
+
+What I take from that is that the idea was the valuable part, and the idea was never mine to own. Sarthak and I did not invent the notion that typed beats untyped at a machine boundary. We had a conviction, we acted on it in July, and someone far better equipped than us acted on the same conviction in a completely different register and shipped something genuinely new. Both things are true and neither diminishes the other.
+
+I want to be straight about scale, because this is the part where these posts usually get coy. browser-use has 114,000 stars. Chrome DevTools MCP has 52,000. Playwright MCP has 37,000. Stagehand has 24,000. headless has none, because it is two months old and we have not asked anyone for one. Being right about a direction and having built the thing that wins are extremely different achievements, and I have only done the first. Having the same instinct as a serious researcher is not a substitute for the years of work between an instinct and a product, and I would rather say that plainly than let the timeline imply otherwise.
+
+So this is a thank you note more than anything. To Sahil, whose one Swift file was the foundation we forked and then wandered away from, and who put it out there for anyone to pick up. To Diogo Almeida, for the research and for saying the thing in one clean sentence that I had been circling for two months. And to Sarthak, who wrote half of it and who I owe a better README.
+
+The lesson I am keeping is that ideas travel. If yours is any good you will meet someone else carrying it, usually when you least expect it and usually better dressed. That is not the bad news. It is the only real confirmation you are ever going to get.
