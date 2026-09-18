@@ -255,7 +255,7 @@ const openSourceData: OpenSourceOrg[] = [
     key: "t3code",
     iconUrl: "https://github.com/pingdotgg.png?size=128",
     label: "pingdotgg/t3code",
-    merged: 11,
+    merged: 13,
     name: "T3 Code",
     description: "An agent harness control surface from Ping.gg. Drive Claude Code, Codex, Cursor and OpenCode from mobile, web, or desktop.",
     siteUrl: "https://t3.codes",
@@ -263,11 +263,13 @@ const openSourceData: OpenSourceOrg[] = [
     repos: [
       {
         repo: "pingdotgg/t3code",
-        merged: 11,
+        merged: 13,
         prs: [
           // Opened by t3dotgg as a rebase of #10313; the commit is ours and the
           // PR body credits it, so it will not show in an author: search.
+          { num: 11381, title: "Release preview hosts after unanswered requests" },
           { num: 10424, title: "Skip disabled settlement lookups" },
+          { num: 10315, title: "Keep the newest shared usage scan" },
           { num: 10308, title: "Preserve Codex reset credits during usage updates" },
           { num: 10303, title: "Link the repository security reporting policy" },
           { num: 8751, title: "Allow local-only worktree bases" },
