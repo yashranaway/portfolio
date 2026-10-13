@@ -289,6 +289,26 @@ const openSourceData: OpenSourceOrg[] = [
     ],
   },
   {
+    key: "cap",
+    iconUrl: "https://github.com/CapSoftware.png?size=128",
+    label: "CapSoftware/Cap",
+    merged: 2,
+    name: "Cap",
+    description: "The open-source Loom alternative. Record, edit and share screen recordings from a desktop app built in Rust.",
+    siteUrl: "https://cap.so",
+    accent: "#4785FF",
+    repos: [
+      {
+        repo: "CapSoftware/Cap",
+        merged: 2,
+        prs: [
+          { num: 2485, title: "Build tray thumbnails from the Recents thumbnail cache" },
+          { num: 2481, title: "Sum waveform peaks over slices instead of per sample" },
+        ],
+      },
+    ],
+  },
+  {
     key: "digitalocean",
     iconUrl: "https://github.com/digitalocean.png?size=128",
     label: "digitalocean/gradient-typescript",
