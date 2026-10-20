@@ -255,7 +255,7 @@ const openSourceData: OpenSourceOrg[] = [
     key: "t3code",
     iconUrl: "https://github.com/pingdotgg.png?size=128",
     label: "pingdotgg/t3code",
-    merged: 17,
+    merged: 20,
     name: "T3 Code",
     description: "An agent harness control surface from Ping.gg. Drive Claude Code, Codex, Cursor and OpenCode from mobile, web, or desktop.",
     siteUrl: "https://t3.codes",
@@ -263,9 +263,11 @@ const openSourceData: OpenSourceOrg[] = [
     repos: [
       {
         repo: "pingdotgg/t3code",
-        merged: 17,
+        merged: 20,
         prs: [
+          { num: 14319, title: "Refresh provider discovery after CLI updates" },
           { num: 11381, title: "Release preview hosts after unanswered requests" },
+          { num: 10606, title: "Stop cancelled OpenCode text generation sessions" },
           { num: 10585, title: "Release relay install locks on cancellation" },
           { num: 10584, title: "Retry failed SQLite statement preparations" },
           { num: 10574, title: "Prevent stale branch selections from restoring files" },
@@ -274,6 +276,7 @@ const openSourceData: OpenSourceOrg[] = [
           { num: 10424, title: "Skip disabled settlement lookups" },
           { num: 10315, title: "Keep the newest shared usage scan" },
           { num: 10311, title: "Classify workspace previews by literal filenames" },
+          { num: 10310, title: "Honor disabled usage hub polling" },
           { num: 10308, title: "Preserve Codex reset credits during usage updates" },
           { num: 10303, title: "Link the repository security reporting policy" },
           { num: 8751, title: "Allow local-only worktree bases" },
@@ -292,7 +295,7 @@ const openSourceData: OpenSourceOrg[] = [
     key: "cap",
     iconUrl: "https://github.com/CapSoftware.png?size=128",
     label: "CapSoftware/Cap",
-    merged: 2,
+    merged: 21,
     name: "Cap",
     description: "The open-source Loom alternative. Record, edit and share screen recordings from a desktop app built in Rust.",
     siteUrl: "https://cap.so",
@@ -300,8 +303,27 @@ const openSourceData: OpenSourceOrg[] = [
     repos: [
       {
         repo: "CapSoftware/Cap",
-        merged: 2,
+        merged: 21,
         prs: [
+          { num: 2678, title: "Recover footage after an early muxer restart" },
+          { num: 2612, title: "Apply audio sync offsets during playback" },
+          { num: 2617, title: "Keep cancelled GIF exports from leaving a partial file" },
+          { num: 2676, title: "Serialize settings store writes" },
+          { num: 2613, title: "Preserve chroma at odd frame edges" },
+          { num: 2685, title: "Count characters, not bytes, at caption boundaries" },
+          { num: 2684, title: "Keep late camera timestamps in the FFmpeg decoder" },
+          { num: 2683, title: "Keep legacy captions that end at the timeline end" },
+          { num: 2681, title: "Show fullscreen titles placed at the end of the video" },
+          { num: 2680, title: "Emit JSON for recording validation errors in the CLI" },
+          { num: 2679, title: "Keep an idle cursor in view when auto zoom starts" },
+          { num: 2677, title: "Retime mask keyframes when clip speed changes" },
+          { num: 2675, title: "Load general settings with one file read" },
+          { num: 2615, title: "Keep audio in place when trimming a track's start" },
+          { num: 2611, title: "Recrop image backgrounds when output size changes" },
+          { num: 2610, title: "Normalize Windows recording asset paths" },
+          { num: 2609, title: "Count buffered timestamp gaps only once" },
+          { num: 2496, title: "Decode settings library thumbnails through the decode pool" },
+          { num: 2495, title: "Check migration keys without parsing the config twice" },
           { num: 2485, title: "Build tray thumbnails from the Recents thumbnail cache" },
           { num: 2481, title: "Sum waveform peaks over slices instead of per sample" },
         ],
@@ -376,7 +398,7 @@ const openSourceTotals = {
 
 const PR_VISIBLE = 5
 
-// Repos run from 1 to 18 merged, and on the busy ones `prs` is a curated subset
+// Repos run from 1 to 21 merged, and on the busy ones `prs` is a curated subset
 // rather than the full set. Rendering every entry made card height track how
 // complete the data happened to be; capping at five without saying so hid the
 // rest silently — gumroad read "18 merged" above exactly five rows. So cap, then
