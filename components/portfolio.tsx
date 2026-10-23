@@ -295,7 +295,7 @@ const openSourceData: OpenSourceOrg[] = [
     key: "cap",
     iconUrl: "https://github.com/CapSoftware.png?size=128",
     label: "CapSoftware/Cap",
-    merged: 21,
+    merged: 61,
     name: "Cap",
     description: "The open-source Loom alternative. Record, edit and share screen recordings from a desktop app built in Rust.",
     siteUrl: "https://cap.so",
@@ -303,9 +303,13 @@ const openSourceData: OpenSourceOrg[] = [
     repos: [
       {
         repo: "CapSoftware/Cap",
-        merged: 21,
+        merged: 61,
         prs: [
+          { num: 2877, title: "Scope notification read updates to their recipient" },
+          { num: 2902, title: "Sign published MP4 storage keys" },
           { num: 2678, title: "Recover footage after an early muxer restart" },
+          { num: 2893, title: "Finish recording jobs after transcription failures" },
+          { num: 2888, title: "Time out hung render farm audio engines" },
           { num: 2612, title: "Apply audio sync offsets during playback" },
           { num: 2617, title: "Keep cancelled GIF exports from leaving a partial file" },
           { num: 2676, title: "Serialize settings store writes" },
@@ -398,7 +402,7 @@ const openSourceTotals = {
 
 const PR_VISIBLE = 5
 
-// Repos run from 1 to 21 merged, and on the busy ones `prs` is a curated subset
+// Repos run from 1 to 61 merged, and on the busy ones `prs` is a curated subset
 // rather than the full set. Rendering every entry made card height track how
 // complete the data happened to be; capping at five without saying so hid the
 // rest silently — gumroad read "18 merged" above exactly five rows. So cap, then
