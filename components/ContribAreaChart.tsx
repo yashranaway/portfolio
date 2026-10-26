@@ -1,9 +1,17 @@
 "use client"
 
-import { AreaChart } from "@/components/dithercn/area-chart"
+import { AreaChart } from "@/components/dither-kit/area-chart"
+import { Area } from "@/components/dither-kit/area"
+import { XAxis } from "@/components/dither-kit/x-axis"
+import { YAxis } from "@/components/dither-kit/y-axis"
+import { Tooltip } from "@/components/dither-kit/tooltip"
 
 export interface ContribChartDatum {
   week: string
+  l1: number
+  l2: number
+  l3: number
+  l4: number
   total: number
 }
 
@@ -13,10 +21,14 @@ interface ContribAreaChartProps {
   year: number
 }
 
-// Weekly totals, one series. Intensity levels are already encoded by colour in
-// the calendar on the page, so plotting the weekly total is the non-redundant
-// half of the picture.
-const series = [{ label: "contributions", value: "total", color: "green" }] as const
+// Weekly totals, one series. This used to stack l1..l4 in GitHub's four-green
+// ramp, which Dither Kit can't express: `DitherColor` is a closed union of
+// seven names, so all four levels would paint the same green. The levels are
+// already encoded by colour in the ActivityCalendar directly above this, so
+// plotting the weekly total is the non-redundant half of the picture.
+const config = {
+  total: { label: "contributions", color: "green" },
+} as const
 
 export default function ContribAreaChart({ data, total, year }: ContribAreaChartProps) {
   return (
@@ -33,14 +45,20 @@ export default function ContribAreaChart({ data, total, year }: ContribAreaChart
         </div>
       </div>
 
-      <AreaChart
-        data={data}
-        x="week"
-        series={series}
-        bloom="low"
-        height={184}
-        className="-mx-2"
-      />
+      <div className="flex-1 min-h-0 -mx-2">
+        <AreaChart
+          data={data}
+          config={config}
+          bloom="aura"
+          margins={{ top: 8, right: 10, left: 0, bottom: 0 }}
+          className="h-full w-full"
+        >
+          <XAxis dataKey="week" />
+          <YAxis />
+          <Tooltip labelKey="week" />
+          <Area dataKey="total" variant="gradient" />
+        </AreaChart>
+      </div>
     </div>
   )
 }
