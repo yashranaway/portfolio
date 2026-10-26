@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import type { ReactNode } from "react"
 
+import { ditherMaskStyle } from "@/lib/dither"
 import { cn } from "@/lib/utils"
 
 // Adapted from Aceternity UI's "Card Hover Effect" (@aceternity/card-hover-effect).
@@ -13,6 +14,10 @@ import { cn } from "@/lib/utils"
 //
 // The highlight slides between cards because every instance shares one
 // layoutId — motion reparents the same element rather than cross-fading two.
+// It is a half-coverage dither rather than a flat tint, so the ring around the
+// hovered card reads as the same texture as the rest of the page's dithers.
+
+const highlightMask = ditherMaskStyle(0.5)
 
 interface HoverHighlightCardProps {
   hovered: boolean
@@ -41,7 +46,8 @@ export function HoverHighlightCard({
       <AnimatePresence>
         {hovered && (
           <motion.span
-            className="absolute inset-0 block h-full w-full rounded-2xl bg-zinc-200/80 dark:bg-zinc-800"
+            className="absolute inset-0 block h-full w-full rounded-2xl bg-zinc-400 dark:bg-zinc-600"
+            style={highlightMask}
             layoutId={layoutId}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.15 } }}

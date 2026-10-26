@@ -1,6 +1,5 @@
 "use client"
 
-import { useTheme } from "next-themes"
 import { Heart, Download, X, GitMerge, ChevronRight, ArrowUpRight } from "lucide-react"
 import { FaXTwitter, FaGithub } from "react-icons/fa6"
 import { useState, useEffect, useMemo, useRef } from "react"
@@ -13,7 +12,8 @@ import TimeCounter from "@/components/TimeCounter"
 import CodeHover from "@/components/CodeHover"
 import LinkPreview from "@/components/LinkPreview"
 import VisitorBadge from "@/components/VisitorBadge"
-import { RandomMatrix } from "@/components/ui/matrix"
+import LossLandscape from "@/components/LossLandscape"
+import { Sparkline } from "@/components/dithercn/sparkline"
 import { HoverHighlightCard } from "@/components/ui/card-hover-effect"
 import { projects as projectsData } from "@/lib/projects"
 import type { Contribution } from "@/lib/github"
@@ -23,10 +23,8 @@ import { getCalApi } from "@calcom/embed-react"
 import dynamic from "next/dynamic"
 import type { ContribChartDatum } from "@/components/ContribAreaChart"
 
-const ActivityCalendar = dynamic(
-  () => import("react-activity-calendar").then((mod) => mod.ActivityCalendar),
-  { ssr: false }
-)
+// The heatmap reads devicePixelRatio while it lays out, so it can't render on the server.
+const Heatmap = dynamic(() => import("@/components/dithercn/heatmap").then((mod) => mod.Heatmap), { ssr: false })
 const ContribAreaChart = dynamic(() => import("@/components/ContribAreaChart"), { ssr: false })
 import githubAvatar from "@/assets/githubphotu.jpg"
 import linkedinAvatar from "@/assets/linkedinphotu.jpg"
@@ -65,8 +63,6 @@ interface OpenSourceOrg {
 }
 
 interface SparklineData {
-  line: string
-  area: string
   total: number
   year: number
   chartData: ContribChartDatum[]
@@ -472,14 +468,24 @@ interface PortfolioProps {
 }
 
 export function Portfolio({ contributions, posts }: PortfolioProps) {
-  const { theme } = useTheme()
   const [scrollProgress, setScrollProgress] = useState<number>(0)
   const [showResume, setShowResume] = useState<boolean>(false)
   const [mounted, setMounted] = useState<boolean>(false)
   const [hoveredProject, setHoveredProject] = useState<number | null>(null)
 
-  // Year-to-date sparkline (weekly buckets from Jan 1 → today),
-  // split by GitHub contribution-intensity level (1–4) for stacked chart.
+  // One very busy day would otherwise set the heatmap's scale and push nearly
+  // every other day into the faintest step, so clip at the 90th percentile of
+  // active days. Busier days still draw solid.
+  const calendar = useMemo(() => {
+    const active = contributions.map((day) => day.count).filter((count) => count > 0).sort((a, b) => a - b)
+    return {
+      days: contributions.map((day) => ({ date: day.date, value: day.count })),
+      total: contributions.reduce((sum, day) => sum + day.count, 0),
+      max: active[Math.floor(active.length * 0.9)] ?? 1,
+    }
+  }, [contributions])
+
+  // Year-to-date weekly totals (Jan 1 → today) for the sparkline and its chart.
   const sparkline = useMemo<SparklineData | null>(() => {
     if (!contributions || contributions.length === 0) return null
     const DAY = 24 * 60 * 60 * 1000
@@ -489,48 +495,24 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
     const yearStartMs = new Date(year, 0, 1).getTime()
     const daysIntoYear = Math.floor((todayStart.getTime() - yearStartMs) / DAY)
     const WEEKS = Math.max(1, Math.ceil((daysIntoYear + 1) / 7))
-    const buckets = Array.from({ length: WEEKS }, () => ({ l1: 0, l2: 0, l3: 0, l4: 0, total: 0 }))
+    const weekTotals = Array.from({ length: WEEKS }, () => 0)
     let total = 0
     for (const c of contributions) {
       const t = new Date(c.date).getTime()
       if (t < yearStartMs || t > todayStart.getTime()) continue
       const daysSinceYearStart = Math.floor((t - yearStartMs) / DAY)
       const weekIdx = Math.min(WEEKS - 1, Math.floor(daysSinceYearStart / 7))
-      const b = buckets[weekIdx]
-      b.total += c.count
-      if (c.level === 1) b.l1 += c.count
-      else if (c.level === 2) b.l2 += c.count
-      else if (c.level === 3) b.l3 += c.count
-      else if (c.level === 4) b.l4 += c.count
+      weekTotals[weekIdx] += c.count
       total += c.count
     }
-    // sparkline path uses week totals
-    const totals = buckets.map((b) => b.total)
-    const max = Math.max(...totals, 1)
-    const W = 240, H = 28, PAD = 2
-    const step = WEEKS > 1 ? W / (WEEKS - 1) : 0
-    const pts: Array<[number, number]> = totals.map((v, i) => {
-      const x = i * step
-      const y = H - (v / max) * (H - PAD * 2) - PAD
-      return [x, y]
-    })
-    const line = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ")
-    const area = `${line} L${W},${H} L0,${H} Z`
-    const chartData: ContribChartDatum[] = buckets.map((b, i) => {
-      const d = new Date(yearStartMs + i * 7 * DAY)
-      return {
-        week: d.toLocaleString("en", { month: "short", day: "numeric" }),
-        l1: b.l1,
-        l2: b.l2,
-        l3: b.l3,
-        l4: b.l4,
-        total: b.total,
-      }
-    })
-    return { line, area, total, year, chartData }
+    const chartData: ContribChartDatum[] = weekTotals.map((weekTotal, i) => ({
+      week: new Date(yearStartMs + i * 7 * DAY).toLocaleString("en", { month: "short", day: "numeric" }),
+      total: weekTotal,
+    }))
+    return { total, year, chartData }
   }, [contributions])
 
-  // Hover state + position for the expanded recharts popup
+  // Hover state + position for the expanded chart popup
   const sparkRef = useRef<HTMLDivElement | null>(null)
   const [sparkTriggerHover, setSparkTriggerHover] = useState<boolean>(false)
   const [sparkPopupHover, setSparkPopupHover] = useState<boolean>(false)
@@ -589,7 +571,7 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
     []
   )
 
-  // Prevent hydration mismatch by only rendering theme-dependent content after mount
+  // The chart popup portals into document.body, which only exists after mount.
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -771,16 +753,14 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
                     data-no-letter
                   >
                     <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em]">this year</span>
-                    <svg viewBox="0 0 240 28" preserveAspectRatio="none" className="w-28 sm:w-32 h-4 sm:h-5 text-zinc-700 dark:text-zinc-300 group-hover:text-[#a371f7] transition-colors" aria-hidden="true">
-                      <defs>
-                        <linearGradient id="spark-grad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="currentColor" stopOpacity="0.35" />
-                          <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path d={sparkline.area} fill="url(#spark-grad)" />
-                      <path d={sparkline.line} stroke="currentColor" strokeWidth="1.25" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <Sparkline
+                      data={sparkline.chartData.map((week) => week.total)}
+                      label="Contributions per week this year"
+                      height={20}
+                      dot={false}
+                      aria-hidden
+                      className="w-28 sm:w-32"
+                    />
                     <span className="font-mono text-xs">
                       <span className="text-zinc-900 dark:text-white tabular-nums">{sparkline.total}</span> contributions
                     </span>
@@ -789,7 +769,7 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
 
                 {sparkline && sparkOpen && mounted && sparkPos.w && sparkPos.h && createPortal(
                   <div
-                    className="fixed z-50"
+                    className="dark fixed z-50"
                     style={{ top: sparkPos.top, left: sparkPos.left, width: sparkPos.w, height: sparkPos.h }}
                     onMouseEnter={sparkEnterPopup}
                     onMouseLeave={sparkLeavePopup}
@@ -879,25 +859,11 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
               </div>
             </div>
 
-            {/* Matrix Component - aligned with top of heading */}
+            {/* Loss landscape - aligned with top of heading */}
             <div className="hidden lg:flex items-start justify-center self-start flex-shrink-0">
-              <RandomMatrix
-                rows={20}
-                cols={20}
-                fps={15}
-                size={8}
-                gap={3}
-                patternChangeInterval={4000}
-                palette={mounted && theme === "dark" ? {
-                  on: "#ffffff",
-                  off: "#000000",
-                } : {
-                  on: "#000000",
-                  off: "#ffffff",
-                }}
-                ariaLabel="Random matrix patterns"
-                className="rounded-lg border-2 border-zinc-600 dark:border-zinc-500 shadow-xl p-3 lg:p-4 bg-white dark:bg-black"
-              />
+              <div className="rounded-lg border-2 border-zinc-600 dark:border-zinc-500 shadow-xl p-3 lg:p-4 bg-white dark:bg-black">
+                <LossLandscape className="size-[216px]" />
+              </div>
             </div>
           </div>
         </section>
@@ -906,42 +872,15 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
         {/* GitHub Activity */}
         <section className="space-y-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           {contributions.length > 0 ? (
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-4 sm:p-6 w-fit mx-auto max-w-full overflow-x-auto">
-              <ActivityCalendar
-                data={contributions}
-                blockSize={14}
-                blockMargin={5}
-                blockRadius={3}
-                fontSize={13}
-                colorScheme={mounted && theme === "dark" ? "dark" : "light"}
-                maxLevel={4}
-                showTotalCount
-                showColorLegend
-                showMonthLabels
-                theme={{
-                  dark: [
-                    "rgb(22, 27, 34)",
-                    "rgb(14, 68, 41)",
-                    "rgb(0, 109, 50)",
-                    "rgb(38, 166, 65)",
-                    "rgb(57, 211, 83)",
-                  ],
-                  light: [
-                    "rgb(235, 237, 240)",
-                    "rgb(155, 233, 168)",
-                    "rgb(64, 196, 99)",
-                    "rgb(48, 161, 78)",
-                    "rgb(33, 110, 57)",
-                  ],
-                }}
-                labels={{
-                  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                  weekdays: ["", "Mon", "", "Wed", "", "Fri", ""],
-                  totalCount: "{{count}} contributions in the last year",
-                }}
-                style={{
-                  color: mounted && theme === "dark" ? "rgb(139, 148, 158)" : "rgb(100, 100, 100)",
-                }}
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-4 sm:p-6 mx-auto max-w-4xl">
+              <p className="mb-3 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                <span className="text-zinc-900 dark:text-white tabular-nums">{calendar.total.toLocaleString()}</span> contributions in the last year
+              </p>
+              <Heatmap
+                data={calendar.days}
+                max={calendar.max}
+                unit={{ one: "contribution", other: "contributions" }}
+                color="green"
               />
             </div>
           ) : null}

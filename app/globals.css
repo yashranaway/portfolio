@@ -22,6 +22,21 @@
   /* Skills marquee. Duration is overridden per-instance via --marquee-duration. */
   --animate-marquee: marquee var(--marquee-duration, 40s) linear infinite;
 
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
+    Consolas, 'Liberation Mono', monospace;
+}
+
+/* Inline so the mapped colours resolve on each element: a nested `.dark`
+   (the always-dark contribution popup) then gets the dark values. */
+@theme inline {
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
@@ -48,17 +63,6 @@
 
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
-
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
-
-  --font-sans:
-    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-mono:
-    var(--font-geist-mono), ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
-    Consolas, 'Liberation Mono', monospace;
 }
 
 /*
@@ -76,6 +80,32 @@
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
+  }
+  :root {
+    --dither-ink: var(--primary);
+    --dither-paper: var(--background);
+    --dither-cell: 3px;
+    --dither-color-blue: oklch(0.56 0.18 248);
+    --dither-color-purple: oklch(0.53 0.22 302);
+    --dither-color-green: oklch(0.58 0.15 152);
+    --dither-color-pink: oklch(0.58 0.21 355);
+    --dither-color-orange: oklch(0.64 0.17 52);
+    --dither-color-red: oklch(0.55 0.21 27);
+    --dither-color-grey: oklch(0.55 0 0);
+    --dither-bloom: 0.6;
+  }
+  .dark {
+    --dither-ink: var(--primary);
+    --dither-paper: var(--background);
+    --dither-cell: 3px;
+    --dither-color-blue: oklch(0.72 0.14 240);
+    --dither-color-purple: oklch(0.7 0.18 304);
+    --dither-color-green: oklch(0.78 0.17 152);
+    --dither-color-pink: oklch(0.74 0.17 354);
+    --dither-color-orange: oklch(0.79 0.15 62);
+    --dither-color-red: oklch(0.68 0.2 25);
+    --dither-color-grey: oklch(0.66 0 0);
+    --dither-bloom: 1;
   }
 }
 
@@ -116,6 +146,11 @@
     --color-neutral-100: rgba(212, 212, 212, 0.3);
     --color-neutral-300: rgba(161, 161, 170, 0.4);
     --color-neutral-500: #737373;
+
+    /* Overrides dithercn's defaults above: this theme stores bare HSL
+       triplets, and the page paper is zinc rather than --background. */
+    --dither-ink: hsl(var(--primary));
+    --dither-paper: var(--color-zinc-50);
   }
 
   .dark {
@@ -143,6 +178,9 @@
     --color-neutral-700: rgba(115, 115, 115, 0.4);
     --color-neutral-800: rgba(64, 64, 64, 0.3);
     --color-neutral-900: rgba(38, 38, 38, 0.3);
+
+    --dither-ink: hsl(var(--primary));
+    --dither-paper: var(--color-zinc-900);
   }
 }
 
@@ -835,4 +873,16 @@ html[data-codehover-open] .marquee-track {
   .t-digit-group .t-digit {
     animation: none !important;
   }
+}
+
+@theme inline {
+  --color-dither-ink: var(--dither-ink);
+  --color-dither-paper: var(--dither-paper);
+  --color-dither-blue: var(--dither-color-blue);
+  --color-dither-purple: var(--dither-color-purple);
+  --color-dither-green: var(--dither-color-green);
+  --color-dither-pink: var(--dither-color-pink);
+  --color-dither-orange: var(--dither-color-orange);
+  --color-dither-red: var(--dither-color-red);
+  --color-dither-grey: var(--dither-color-grey);
 }
