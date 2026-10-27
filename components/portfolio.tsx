@@ -145,7 +145,7 @@ const openSourceData: OpenSourceOrg[] = [
     iconUrl: "https://assets.gumroad.com/assets/pink-icon-c5f5013768a1da41246e70403f02afc8b34ac89c20f3ba2dd0a01f3973027700.png",
     label: "antiwork",
     sub: "Gumroad · 2 repos",
-    merged: 19,
+    merged: 21,
     name: "Gumroad",
     description: "Creator commerce platform. Sell digital products, courses, and memberships. Now open-source under Antiwork (Sahil Lavingia).",
     siteUrl: "https://gumroad.com",
@@ -153,8 +153,13 @@ const openSourceData: OpenSourceOrg[] = [
     repos: [
       {
         repo: "antiwork/gumroad",
-        merged: 18,
+        merged: 20,
         prs: [
+          // Imported by the Gumroad team from yashranaway/gumroad#5 and #6; the
+          // squashed commits credit us as co-author, so they will not show in an
+          // author: search.
+          { num: 8681, title: "Cache the empty subdomain-redirect table and degrade on Redis errors" },
+          { num: 8682, title: "Mark a product file's transcoded videos deleted along with the file" },
           { num: 2810, title: "Auto-suspend creators sharing ACH via stripe fingerprints" },
           { num: 3066, title: "Preserve offer-code discount for installments" },
           { num: 2384, title: "Migrate payouts to Inertia" },
