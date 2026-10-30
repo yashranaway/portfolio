@@ -24,7 +24,7 @@ interface ContribAreaChartProps {
 // Weekly totals, one series. This used to stack l1..l4 in GitHub's four-green
 // ramp, which Dither Kit can't express: `DitherColor` is a closed union of
 // seven names, so all four levels would paint the same green. The levels are
-// already encoded by colour in the ActivityCalendar directly above this, so
+// already encoded by colour in the ContribHeatmap on the page, so
 // plotting the weekly total is the non-redundant half of the picture.
 const config = {
   total: { label: "contributions", color: "green" },

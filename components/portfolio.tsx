@@ -23,10 +23,7 @@ import { getCalApi } from "@calcom/embed-react"
 import dynamic from "next/dynamic"
 import type { ContribChartDatum } from "@/components/ContribAreaChart"
 
-const ActivityCalendar = dynamic(
-  () => import("react-activity-calendar").then((mod) => mod.ActivityCalendar),
-  { ssr: false }
-)
+const ContribHeatmap = dynamic(() => import("@/components/ContribHeatmap"), { ssr: false })
 const ContribAreaChart = dynamic(() => import("@/components/ContribAreaChart"), { ssr: false })
 import githubAvatar from "@/assets/githubphotu.jpg"
 import linkedinAvatar from "@/assets/linkedinphotu.jpg"
@@ -815,19 +812,6 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
                   </p>
 
                   <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                    Studying at{" "}
-                    <a
-                      href="https://www.vupune.ac.in/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-zinc-900 dark:text-white font-medium hover:underline break-words"
-                      itemProp="alumniOf"
-                    >
-                      Vishwakarma University
-                    </a>
-                  </p>
-
-                  <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     I live in Pune, Maharashtra. You can keep up with me on{" "}
                     <LinkPreview
                       title="LinkedIn • Aditya Garud"
@@ -911,43 +895,8 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
         {/* GitHub Activity */}
         <section className="space-y-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           {contributions.length > 0 ? (
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-4 sm:p-6 w-fit mx-auto max-w-full overflow-x-auto">
-              <ActivityCalendar
-                data={contributions}
-                blockSize={14}
-                blockMargin={5}
-                blockRadius={3}
-                fontSize={13}
-                colorScheme={mounted && theme === "dark" ? "dark" : "light"}
-                maxLevel={4}
-                showTotalCount
-                showColorLegend
-                showMonthLabels
-                theme={{
-                  dark: [
-                    "rgb(22, 27, 34)",
-                    "rgb(14, 68, 41)",
-                    "rgb(0, 109, 50)",
-                    "rgb(38, 166, 65)",
-                    "rgb(57, 211, 83)",
-                  ],
-                  light: [
-                    "rgb(235, 237, 240)",
-                    "rgb(155, 233, 168)",
-                    "rgb(64, 196, 99)",
-                    "rgb(48, 161, 78)",
-                    "rgb(33, 110, 57)",
-                  ],
-                }}
-                labels={{
-                  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                  weekdays: ["", "Mon", "", "Wed", "", "Fri", ""],
-                  totalCount: "{{count}} contributions in the last year",
-                }}
-                style={{
-                  color: mounted && theme === "dark" ? "rgb(139, 148, 158)" : "rgb(100, 100, 100)",
-                }}
-              />
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-4 sm:p-6 h-[228px] sm:h-[288px] max-w-5xl mx-auto">
+              <ContribHeatmap contributions={contributions} />
             </div>
           ) : null}
         </section>

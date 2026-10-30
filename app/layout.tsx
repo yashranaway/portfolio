@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: "%s | Aditya Garud",
   },
   description:
-    "Aditya Garud is a Full Stack Developer and Machine Learning Engineer specializing in AI, web development, and computer vision. Technical Lead at TekLingo, studying at Vishwakarma University, Pune.",
+    "Aditya Garud is a Full Stack Developer and Machine Learning Engineer specializing in AI, web development, and computer vision. Based in Pune.",
   keywords: [
     "Aditya Garud",
     "Full Stack Developer",
@@ -38,8 +38,6 @@ export const metadata: Metadata = {
     "React Developer",
     "Next.js Developer",
     "Python Developer",
-    "TekLingo",
-    "Vishwakarma University",
     "Pune Developer",
     "Computer Vision",
     "Deep Learning",
@@ -48,7 +46,6 @@ export const metadata: Metadata = {
     "Discord Bot Developer",
     "LSTM",
     "NLP",
-    "Technical Lead",
   ],
   authors: [{ name: "Aditya Garud", url: "https://github.com/yashranaway" }],
   creator: "Aditya Garud",
@@ -71,7 +68,7 @@ export const metadata: Metadata = {
     siteName: "Aditya Garud Portfolio",
     title: "Aditya Garud - Full Stack Developer & Machine Learning Engineer",
     description:
-      "Full Stack Developer and Machine Learning Engineer specializing in AI, web development, and computer vision. Technical Lead at TekLingo.",
+      "Full Stack Developer and Machine Learning Engineer specializing in AI, web development, and computer vision.",
     images: [
       {
         url: "/og-image.png",
@@ -163,15 +160,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
         "Python",
         "TypeScript",
       ],
-    },
-    worksFor: {
-      "@type": "Organization",
-      name: "TekLingo",
-    },
-    alumniOf: {
-      "@type": "EducationalOrganization",
-      name: "Vishwakarma University",
-      url: "https://www.vupune.ac.in/",
     },
     address: {
       "@type": "PostalAddress",
