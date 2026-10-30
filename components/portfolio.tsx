@@ -808,7 +808,7 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
                   <h2 className="text-base sm:text-lg md:text-xl font-medium text-zinc-900 dark:text-white">about;</h2>
 
                   <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                    i&apos;m into machine learning, agents, and shipping things i probably shouldn&apos;t
+                    i make computers do things, occasionally the things i asked for
                   </p>
 
                   <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 leading-relaxed">
