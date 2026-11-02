@@ -16,6 +16,7 @@ import VisitorBadge from "@/components/VisitorBadge"
 import { RandomMatrix } from "@/components/ui/matrix"
 import { HoverHighlightCard } from "@/components/ui/card-hover-effect"
 import { projects as projectsData } from "@/lib/projects"
+import { mergedCount, openSourceData, openSourceTotals, type OpenSourceRepo } from "@/lib/open-source"
 import type { Contribution } from "@/lib/github"
 import { formatDate } from "@/lib/format"
 import type { PostMeta } from "@/lib/posts"
@@ -35,30 +36,6 @@ interface Skill {
   iconUrl: string
   /** CodeHover preset key — omit for skills with no snippet. */
   lang?: string
-}
-
-interface OpenSourcePR {
-  num: number
-  title: string
-}
-
-interface OpenSourceRepo {
-  repo: string
-  merged: number
-  prs: OpenSourcePR[]
-}
-
-interface OpenSourceOrg {
-  key: string
-  iconUrl: string
-  label: string
-  sub?: string
-  merged: number
-  name: string
-  description: string
-  siteUrl: string
-  accent: string
-  repos: OpenSourceRepo[]
 }
 
 interface SparklineData {
@@ -135,287 +112,13 @@ const skills: Skill[] = [
   { name: "Postman", iconUrl: "https://skillicons.dev/icons?i=postman", lang: "postman" },
 ]
 
-// Open Source contributions (curated, merged-only)
-const openSourceData: OpenSourceOrg[] = [
-  {
-    key: "antiwork",
-    iconUrl: "https://assets.gumroad.com/assets/pink-icon-c5f5013768a1da41246e70403f02afc8b34ac89c20f3ba2dd0a01f3973027700.png",
-    label: "antiwork",
-    sub: "Gumroad · 2 repos",
-    merged: 21,
-    name: "Gumroad",
-    description: "Creator commerce platform. Sell digital products, courses, and memberships. Now open-source under Antiwork (Sahil Lavingia).",
-    siteUrl: "https://gumroad.com",
-    accent: "#ff90e8",
-    repos: [
-      {
-        repo: "antiwork/gumroad",
-        merged: 20,
-        prs: [
-          // Imported by the Gumroad team from yashranaway/gumroad#5 and #6; the
-          // squashed commits credit us as co-author, so they will not show in an
-          // author: search.
-          { num: 8681, title: "Cache the empty subdomain-redirect table and degrade on Redis errors" },
-          { num: 8682, title: "Mark a product file's transcoded videos deleted along with the file" },
-          { num: 2810, title: "Auto-suspend creators sharing ACH via stripe fingerprints" },
-          { num: 3066, title: "Preserve offer-code discount for installments" },
-          { num: 2384, title: "Migrate payouts to Inertia" },
-          { num: 2270, title: "Auto-apply VAT ID to recurring subscription charges" },
-          { num: 2769, title: "Add sendgrid resend fallback" },
-        ],
-      },
-      {
-        repo: "antiwork/gumroad-mobile",
-        merged: 1,
-        prs: [
-          { num: 70, title: "Native table-of-contents navigation for multi-page products" },
-        ],
-      },
-    ],
-  },
-  {
-    key: "dodopayments",
-    iconUrl: "https://github.com/dodopayments.png?size=128",
-    label: "dodopayments",
-    sub: "4 repos",
-    merged: 21,
-    name: "Dodo Payments",
-    description: "YC-backed global payments infrastructure. Stripe-style API for emerging markets.",
-    siteUrl: "https://dodopayments.com",
-    accent: "#A0E636",
-    repos: [
-      {
-        repo: "dodopayments/billingsdk",
-        merged: 14,
-        prs: [
-          { num: 306, title: "Auto-discovery system for playground components" },
-          { num: 283, title: "Add Stripe support for Fastify template" },
-          { num: 338, title: "Update CI/CD for registry generation" },
-          { num: 255, title: "Fix pricing-table responsiveness" },
-          { num: 243, title: "Fix CI build warnings & overall cleanup" },
-        ],
-      },
-      {
-        repo: "dodopayments/dodo-discord-bot",
-        merged: 3,
-        prs: [
-          { num: 1, title: "Welcoming revamp with embeds" },
-          { num: 4, title: "Auto-thread feature" },
-          { num: 3, title: "Ping command for latency metrics" },
-        ],
-      },
-      {
-        repo: "dodopayments/dodo-migrate",
-        merged: 3,
-        prs: [
-          { num: 6, title: "Add Stripe provider integration" },
-          { num: 7, title: "Add Coupons migration for Lemon Squeezy" },
-          { num: 9, title: "Specify product types for Stripe migration" },
-        ],
-      },
-      {
-        repo: "dodopayments/dualmark",
-        merged: 1,
-        prs: [
-          { num: 32, title: "Add @dualmark/sveltekit adapter" },
-        ],
-      },
-    ],
-  },
-  {
-    key: "omacom",
-    iconUrl: "https://github.com/omacom.png?size=128",
-    label: "omacom",
-    sub: "Omarchy · 2 repos",
-    merged: 6,
-    name: "Omacom",
-    description: "Beautiful, modern and opinionated Linux — Arch and Hyprland configured out of the box. ttfx is a parity-exact Rust port of terminaltexteffects, shipped as a single static binary.",
-    siteUrl: "https://omacom.io",
-    accent: "#f97316",
-    repos: [
-      {
-        repo: "omacom/omarchy",
-        merged: 4,
-        prs: [
-          { num: 6763, title: "Keep shell tests inside their fixtures" },
-          { num: 6752, title: "Treat LVDS panels as internal displays" },
-          { num: 6738, title: "Stop hybrid GPU mode queries from hanging" },
-          { num: 6732, title: "Only offer video capture devices as webcams" },
-        ],
-      },
-      {
-        repo: "omacom/ttfx",
-        merged: 2,
-        prs: [
-          { num: 9, title: "Restore the cursor on SIGTERM" },
-          { num: 4, title: "Rebuild effects when the terminal is resized" },
-        ],
-      },
-    ],
-  },
-  {
-    key: "t3code",
-    iconUrl: "https://github.com/pingdotgg.png?size=128",
-    label: "pingdotgg/t3code",
-    merged: 20,
-    name: "T3 Code",
-    description: "An agent harness control surface from Ping.gg. Drive Claude Code, Codex, Cursor and OpenCode from mobile, web, or desktop.",
-    siteUrl: "https://t3.codes",
-    accent: "#e11d48",
-    repos: [
-      {
-        repo: "pingdotgg/t3code",
-        merged: 20,
-        prs: [
-          { num: 14319, title: "Refresh provider discovery after CLI updates" },
-          { num: 11381, title: "Release preview hosts after unanswered requests" },
-          { num: 10606, title: "Stop cancelled OpenCode text generation sessions" },
-          { num: 10585, title: "Release relay install locks on cancellation" },
-          { num: 10584, title: "Retry failed SQLite statement preparations" },
-          { num: 10574, title: "Prevent stale branch selections from restoring files" },
-          // Opened by t3dotgg as a rebase of #10313; the commit is ours and the
-          // PR body credits it, so it will not show in an author: search.
-          { num: 10424, title: "Skip disabled settlement lookups" },
-          { num: 10315, title: "Keep the newest shared usage scan" },
-          { num: 10311, title: "Classify workspace previews by literal filenames" },
-          { num: 10310, title: "Honor disabled usage hub polling" },
-          { num: 10308, title: "Preserve Codex reset credits during usage updates" },
-          { num: 10303, title: "Link the repository security reporting policy" },
-          { num: 8751, title: "Allow local-only worktree bases" },
-          { num: 8750, title: "Bound OpenCode version probes" },
-          { num: 8634, title: "Skip IDE detection during Claude probes" },
-          { num: 8630, title: "Avoid stale file writes on close" },
-          { num: 4470, title: "Keep the server alive when a response write hits a dead socket" },
-          { num: 4469, title: "Limit physical key fallback to non-Latin layout output" },
-          { num: 4468, title: "Keep block code plain when copying from rendered markdown" },
-          { num: 4466, title: "Skip user hooks during Claude capability probes" },
-        ],
-      },
-    ],
-  },
-  {
-    key: "cap",
-    iconUrl: "https://github.com/CapSoftware.png?size=128",
-    label: "CapSoftware/Cap",
-    merged: 61,
-    name: "Cap",
-    description: "The open-source Loom alternative. Record, edit and share screen recordings from a desktop app built in Rust.",
-    siteUrl: "https://cap.so",
-    accent: "#4785FF",
-    repos: [
-      {
-        repo: "CapSoftware/Cap",
-        merged: 61,
-        prs: [
-          { num: 2877, title: "Scope notification read updates to their recipient" },
-          { num: 2902, title: "Sign published MP4 storage keys" },
-          { num: 2678, title: "Recover footage after an early muxer restart" },
-          { num: 2893, title: "Finish recording jobs after transcription failures" },
-          { num: 2888, title: "Time out hung render farm audio engines" },
-          { num: 2612, title: "Apply audio sync offsets during playback" },
-          { num: 2617, title: "Keep cancelled GIF exports from leaving a partial file" },
-          { num: 2676, title: "Serialize settings store writes" },
-          { num: 2613, title: "Preserve chroma at odd frame edges" },
-          { num: 2685, title: "Count characters, not bytes, at caption boundaries" },
-          { num: 2684, title: "Keep late camera timestamps in the FFmpeg decoder" },
-          { num: 2683, title: "Keep legacy captions that end at the timeline end" },
-          { num: 2681, title: "Show fullscreen titles placed at the end of the video" },
-          { num: 2680, title: "Emit JSON for recording validation errors in the CLI" },
-          { num: 2679, title: "Keep an idle cursor in view when auto zoom starts" },
-          { num: 2677, title: "Retime mask keyframes when clip speed changes" },
-          { num: 2675, title: "Load general settings with one file read" },
-          { num: 2615, title: "Keep audio in place when trimming a track's start" },
-          { num: 2611, title: "Recrop image backgrounds when output size changes" },
-          { num: 2610, title: "Normalize Windows recording asset paths" },
-          { num: 2609, title: "Count buffered timestamp gaps only once" },
-          { num: 2496, title: "Decode settings library thumbnails through the decode pool" },
-          { num: 2495, title: "Check migration keys without parsing the config twice" },
-          { num: 2485, title: "Build tray thumbnails from the Recents thumbnail cache" },
-          { num: 2481, title: "Sum waveform peaks over slices instead of per sample" },
-        ],
-      },
-    ],
-  },
-  {
-    key: "digitalocean",
-    iconUrl: "https://github.com/digitalocean.png?size=128",
-    label: "digitalocean/gradient-typescript",
-    merged: 1,
-    name: "DigitalOcean",
-    description: "Cloud infrastructure for developers. Droplets, Kubernetes, managed databases.",
-    siteUrl: "https://digitalocean.com",
-    accent: "#0080FF",
-    repos: [
-      {
-        repo: "digitalocean/gradient-typescript",
-        merged: 1,
-        prs: [
-          { num: 8, title: "waitForDatabase polling helper for knowledge bases" },
-        ],
-      },
-    ],
-  },
-  {
-    key: "ghostfolio",
-    iconUrl: "https://github.com/ghostfolio.png?size=128",
-    label: "ghostfolio/ghostfolio",
-    merged: 1,
-    name: "Ghostfolio",
-    description: "Open-source wealth-management dashboard for self-directed investors.",
-    siteUrl: "https://ghostfol.io",
-    accent: "#36B37E",
-    repos: [
-      {
-        repo: "ghostfolio/ghostfolio",
-        merged: 1,
-        prs: [
-          { num: 5656, title: "Preselect first search result in assistant" },
-        ],
-      },
-    ],
-  },
-  {
-    key: "different-ai",
-    iconUrl: "https://github.com/different-ai.png?size=128",
-    label: "different-ai/openwork",
-    merged: 1,
-    name: "different.ai",
-    description: "Open-source AI dev tooling. Makers of opencode and openwork.",
-    siteUrl: "https://different.ai",
-    accent: "#7C3AED",
-    repos: [
-      {
-        repo: "different-ai/openwork",
-        merged: 1,
-        prs: [
-          { num: 1567, title: "Forward --opencode-log-level to managed opencode serve" },
-        ],
-      },
-    ],
-  },
-]
-
-// Derived from openSourceData so the summary line can't drift from the list.
-const openSourceTotals = {
-  merged: openSourceData.reduce((n, o) => n + o.merged, 0),
-  orgs: openSourceData.length,
-  repos: openSourceData.reduce((n, o) => n + o.repos.length, 0),
-}
-
 const PR_VISIBLE = 5
 
-// Repos run from 1 to 61 merged, and on the busy ones `prs` is a curated subset
-// rather than the full set. Rendering every entry made card height track how
-// complete the data happened to be; capping at five without saying so hid the
-// rest silently — gumroad read "18 merged" above exactly five rows. So cap, then
-// state both kinds of remainder: expand the ones we hold, link out for the ones
-// we never wrote down.
+// Repos run from 1 to 121 merged, so cap each list and say how many are hidden.
 function RepoPrList({ repo, nested = false }: { repo: OpenSourceRepo; nested?: boolean }) {
   const [expanded, setExpanded] = useState(false)
   const visible = expanded ? repo.prs : repo.prs.slice(0, PR_VISIBLE)
   const collapsed = repo.prs.length - visible.length
-  // Merges we know the count of but never listed a title for.
-  const undocumented = repo.merged - repo.prs.length
 
   return (
     <>
@@ -440,27 +143,15 @@ function RepoPrList({ repo, nested = false }: { repo: OpenSourceRepo; nested?: b
         ))}
       </ul>
 
-      {(collapsed > 0 || expanded || undocumented > 0) && (
-        <div className="mt-1.5 pl-4 sm:pl-5 flex items-center gap-3 font-mono text-[10px] text-zinc-500">
-          {(collapsed > 0 || expanded) && (
-            <button
-              type="button"
-              onClick={() => setExpanded((v) => !v)}
-              className="hover:text-zinc-900 dark:hover:text-white transition-colors"
-            >
-              {expanded ? "show less" : `+ ${collapsed} more`}
-            </button>
-          )}
-          {undocumented > 0 && (
-            <a
-              href={`https://github.com/${repo.repo}/pulls?q=is%3Apr+author%3Ayashranaway+is%3Amerged`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-zinc-900 dark:hover:text-white transition-colors"
-            >
-              + {undocumented} on GitHub ↗
-            </a>
-          )}
+      {(collapsed > 0 || expanded) && (
+        <div className="mt-1.5 pl-4 sm:pl-5 font-mono text-[10px] text-zinc-500">
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="hover:text-zinc-900 dark:hover:text-white transition-colors"
+          >
+            {expanded ? "show less" : `+ ${collapsed} more`}
+          </button>
         </div>
       )}
     </>
@@ -974,7 +665,7 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
                       </LinkPreview>
                     </div>
                     <span className="font-mono text-xs tabular-nums text-zinc-500 flex-shrink-0">
-                      {org.merged} merged
+                      {mergedCount(org)} merged
                     </span>
                   </summary>
 
@@ -996,7 +687,7 @@ export function Portfolio({ contributions, posts }: PortfolioProps) {
                               {repo.repo}
                             </a>
                             <span className="font-mono text-[10px] text-zinc-500 ml-auto flex-shrink-0">
-                              {repo.merged} merged ↗
+                              {repo.prs.length} merged ↗
                             </span>
                           </summary>
                           <RepoPrList repo={repo} nested />
