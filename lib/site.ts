@@ -13,3 +13,14 @@ export const SITE_DOMAIN = "adityagarud.com"
 export function absoluteUrl(path = ""): string {
   return path ? `${SITE_URL}/${path.replace(/^\//, "")}` : SITE_URL
 }
+
+export const SITE_DESCRIPTION =
+  "Aditya Garud is a Full Stack Developer and Machine Learning Engineer specializing in AI, web development, and computer vision. Based in Pune."
+
+export const EMAIL = "garudaditya079@gmail.com"
+
+export const PROFILES = {
+  github: "https://github.com/yashranaway",
+  linkedin: "https://www.linkedin.com/in/aditya-garud-8b633a303",
+  x: "https://x.com/yashranaway",
+}

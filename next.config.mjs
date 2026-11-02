@@ -16,6 +16,24 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Points agents at the plain-text versions of the homepage (RFC 8288).
+  async headers() {
+    return [
+      {
+        source: "/",
+        headers: [
+          {
+            key: "Link",
+            value: [
+              '</sitemap.xml>; rel="sitemap"',
+              '</index.md>; rel="alternate"; type="text/markdown"',
+              '</llms.txt>; rel="describedby"; type="text/plain"',
+            ].join(", "),
+          },
+        ],
+      },
+    ]
+  },
 }
 
 // Plugins must be named as strings, not imported functions: Turbopack requires

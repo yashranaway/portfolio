@@ -9,7 +9,7 @@ import { SITE_URL } from "@/lib/site"
 // a fresh modification. Google discounts lastmod entirely when it sees it move
 // without the content moving with it, so an honest fixed date is worth more
 // than an automatic one. Posts carry their own dates, so they don't need it.
-const LAST_CONTENT_UPDATE = "2026-08-12"
+const LAST_CONTENT_UPDATE = "2026-11-02"
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const posts = getPosts()
@@ -20,6 +20,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: LAST_CONTENT_UPDATE,
       changeFrequency: "monthly",
       priority: 1,
+    },
+    {
+      url: `${SITE_URL}/developers`,
+      lastModified: LAST_CONTENT_UPDATE,
+      changeFrequency: "monthly",
+      priority: 0.3,
     },
     {
       url: `${SITE_URL}/blog`,

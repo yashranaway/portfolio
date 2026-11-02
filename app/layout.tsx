@@ -3,10 +3,11 @@ import type { ReactNode } from "react"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { ThemeProvider } from "./theme-provider"
+import WebMcpTools from "@/components/WebMcpTools"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/next"
 import { projects } from "@/lib/projects"
-import { SITE_URL } from "@/lib/site"
+import { EMAIL, PROFILES, SITE_DESCRIPTION, SITE_URL } from "@/lib/site"
 
 // Search-engine ownership tokens. Set these in Vercel → Settings → Environment
 // Variables, then redeploy; the meta tags only render once a value exists, so an
@@ -27,8 +28,7 @@ export const metadata: Metadata = {
     default: "Aditya Garud - Full Stack Developer & Machine Learning Engineer",
     template: "%s | Aditya Garud",
   },
-  description:
-    "Aditya Garud is a Full Stack Developer and Machine Learning Engineer specializing in AI, web development, and computer vision. Based in Pune.",
+  description: SITE_DESCRIPTION,
   keywords: [
     "Aditya Garud",
     "Full Stack Developer",
@@ -143,8 +143,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
     givenName: "Aditya",
     familyName: "Garud",
     url: SITE_URL,
+    description: SITE_DESCRIPTION,
     image: "https://github.com/yashranaway.png",
-    email: "mailto:garudaditya079@gmail.com",
+    email: `mailto:${EMAIL}`,
     jobTitle: "Full Stack Developer & Machine Learning Engineer",
     hasOccupation: {
       "@type": "Occupation",
@@ -169,11 +170,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     },
     nationality: { "@type": "Country", name: "India" },
     knowsLanguage: ["English", "Hindi", "Marathi"],
-    sameAs: [
-      "https://github.com/yashranaway",
-      "https://www.linkedin.com/in/aditya-garud-8b633a303",
-      "https://x.com/yashranaway",
-    ],
+    sameAs: Object.values(PROFILES),
     knowsAbout: [
       "Machine Learning",
       "Artificial Intelligence",
@@ -263,6 +260,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           {children}
         </ThemeProvider>
         <Analytics />
+        <WebMcpTools />
       </body>
     </html>
   )
